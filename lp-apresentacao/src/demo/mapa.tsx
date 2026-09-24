@@ -7,3 +7,8 @@ export const MapaOperacao = dynamic(() => import("./mapa-operacao"), {
   ssr: false,
   loading: () => <div className="h-full min-h-[320px] animate-pulse rounded-2xl bg-secondary" />,
 });
+
+export const MapaCalor = dynamic(() => import("./mapa-calor"), {
+  ssr: false,
+  loading: () => <div className="h-[520px] animate-pulse rounded-2xl bg-secondary" />,
+});

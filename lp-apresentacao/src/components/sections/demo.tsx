@@ -6,7 +6,7 @@ import { useSim, type Modo, type SimData, type Tema } from "./demo-sim";
 import { JornadaStrip, VIEW_DEFS, VIEW_MAP, type ViewId } from "./demo-views";
 import { FaixaMercado } from "@/demo/faixa-mercado";
 
-const CHIPS = ["empresa fictícia", "R$ 7,2 bi/ano", "142 postos", "20 bases", "640 mil CBIOs/ano"];
+const CHIPS = ["empresa fictícia", "porte de regional top 5", "5 bases próprias", "24 praças", "30 rotas", "170 postos bandeirados"];
 
 const NAV = VIEW_DEFS.map((d, i) => ({ ...d, header: i === 0 || VIEW_DEFS[i - 1].grupo !== d.grupo }));
 

@@ -34,11 +34,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { chartTheme, fmtDec, fmtInt, fmtMi, fmtRs, PAL, POSTOS, prodTone, PRODUTOS, SISTEMAS, serieDias, type Ordem, type SimData, type Tema } from "./demo-sim";
-import { MapaOperacao } from "@/demo/mapa";
+import { chartTheme, fmtDec, fmtInt, fmtMi, fmtRs, margemPorProduto, margemRsM3, PAL, POSTOS, prodTone, PRODUTOS, SISTEMAS, serieDias, type Ordem, type SimData, type Tema } from "./demo-sim";
+import { MapaCalor, MapaOperacao } from "@/demo/mapa";
 import { RegulacaoView } from "@/demo/regulacao";
 
 export type ViewId =
+  | "calor"
   | "visao"
   | "comercial"
   | "precos"
@@ -59,6 +60,7 @@ export const VIEW_DEFS: { id: ViewId; grupo: string; label: string; sub: string 
   { id: "logistica", grupo: "Operação", label: "Logística", sub: "Rotas, frota e janelas" },
   { id: "financeiro", grupo: "Financeiro", label: "Financeiro & Caixa", sub: "Fluxo, aging e cobrança" },
   { id: "fiscal", grupo: "Back-office", label: "Regulação ao vivo", sub: "Normas, prazos e agentes" },
+  { id: "calor", grupo: "Inteligência", label: "Oportunidades & Riscos", sub: "Mapa de calor por UF" },
   { id: "ia", grupo: "Inteligência", label: "Centro de IA", sub: "Agentes operando o fluxo" },
   { id: "seguranca", grupo: "Inteligência", label: "Segurança & Compliance", sub: "Trilha, controles e LGPD" },
 ];
@@ -73,7 +75,7 @@ export function Stat({ label, value, delta, nota }: { label: string; value: stri
   return (
     <div className="flex flex-col justify-between gap-1.5 rounded-xl bg-card p-3.5 ring-1 ring-foreground/[0.07]">
       <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className="text-[19px] font-semibold tabular-nums leading-tight tracking-tight text-foreground">{value}</p>
+      <p className={`${value.length > 13 ? "text-[15.5px]" : "text-[19px]"} whitespace-nowrap font-semibold tabular-nums leading-tight tracking-tight text-foreground`}>{value}</p>
       {(delta || nota) && (
         <p className={`flex items-center gap-1 text-[10.5px] ${down ? "text-destructive" : up ? "text-foreground" : "text-muted-foreground"}`}>
           {up && <ArrowUpRight className="h-3 w-3" />}
@@ -155,8 +157,8 @@ function HoraChart({ tema }: { tema: Tema }) {
   const th = chartTheme(tema);
   const pal = PAL[tema];
   const data = useMemo(() => {
-    const vols = serieDias(14, 41, 980, 320);
-    return vols.map((v, i) => ({ h: `${String(6 + i).padStart(2, "0")}h`, v }));
+    const vols = serieDias(14, 41, 560, 170);
+    return vols.map((v, i) => ({ h: `${String(6 + i).padStart(2, "0")}h`, v: Math.round(v) }));
   }, []);
   return (
     <div className="h-40">
@@ -164,9 +166,9 @@ function HoraChart({ tema }: { tema: Tema }) {
         <LineChart data={data} margin={{ top: 6, right: 8, bottom: 0, left: -14 }}>
           <CartesianGrid stroke={th.grid} vertical={false} />
           <XAxis dataKey="h" tick={th.tick} axisLine={false} tickLine={false} />
-          <YAxis tick={th.tick} axisLine={false} tickLine={false} tickFormatter={(v) => `${(Number(v) / 1000).toFixed(0)}k`} />
-          <Tooltip contentStyle={th.tip} labelStyle={{ color: "inherit" }} formatter={(v) => fmtInt(Number(v)) + " L"} />
-          <Line type="monotone" dataKey="v" stroke={pal.s1} strokeWidth={2} dot={false} />
+          <YAxis tick={th.tick} axisLine={false} tickLine={false} tickFormatter={(v) => fmtInt(Number(v))} width={44} />
+          <Tooltip contentStyle={th.tip} labelStyle={{ color: "inherit" }} formatter={(v) => fmtInt(Number(v)) + " m³"} />
+          <Line type="monotone" dataKey="v" stroke={pal.s1} strokeWidth={2} dot={false} isAnimationActive={false} />
         </LineChart>
       </ResponsiveContainer>
     </div>
@@ -181,9 +183,9 @@ export function VisaoGeral({ sim, tema, onNav }: ViewProps) {
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
-        <Stat label="Volume do dia" value={fmtInt(sim.volume) + " L"} delta={sim.modo === "integrada" ? "▲ +9,4%" : "▼ +4,1%"} nota="vs. ontem" />
+        <Stat label="Volume do dia" value={fmtInt(sim.volume / 1000) + " m³"} delta={sim.modo === "integrada" ? "▲ +9,4%" : "▼ +4,1%"} nota="vs. ontem" />
         <Stat label="Receita do dia" value={fmtMi(sim.receita)} delta={sim.modo === "integrada" ? "▲ +11,2%" : "▼ +5,6%"} />
-        <Stat label="Margem bruta" value={fmtDec(sim.margem) + "%"} delta={sim.modo === "integrada" ? "▲ +0,9 p.p." : "▼ -0,3 p.p."} nota="alvo: 2,9%" />
+        <Stat label="Margem bruta" value={fmtRs(+margemRsM3(sim.precos).toFixed(2)) + "/m³"} delta={sim.modo === "integrada" ? "▲ copiloto repassando custo" : "▼ tabela desatualizada"} nota="média ponderada pelo mix" />
         <Stat label="Janela cumprida" value={sim.janela + "%"} delta={sim.modo === "integrada" ? "▲ +2,1 p.p." : "▼ -4,2 p.p."} />
         <Stat label="Km vazio" value={fmtDec(sim.kmVazio) + "%"} delta={sim.modo === "integrada" ? "▲ -3,8 p.p." : "▼ +5,1 p.p."} />
         <Stat label="Alertas abertos" value={String(sim.alertas)} nota={sim.modo === "integrada" ? "tratados por agentes" : "fila humana de triagem"} />
@@ -197,8 +199,8 @@ export function VisaoGeral({ sim, tema, onNav }: ViewProps) {
           action={<Badge variant="secondary">IA</Badge>}
         >
           <ul className="space-y-2 text-[11.5px] leading-snug text-foreground/80">
-            <li className="flex gap-2"><Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-foreground/60" />Volume 9% acima do previsto no corredor Salvador–Feira. Sugestão: antecipar 2 cargas para LEM e Pojuca.</li>
-            <li className="flex gap-2"><Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-foreground/60" />Concorrente cortou o preço da gasolina em Pojuca. Reprecificação pronta, respeitando o piso de margem.</li>
+            <li className="flex gap-2"><Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-foreground/60" />Volume 9% acima do previsto no corredor Salvador–Feira. Sugestão: antecipar 2 cargas para Barreiras e Camaçari.</li>
+            <li className="flex gap-2"><Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-foreground/60" />Concorrente cortou o preço da gasolina em Camaçari. Reprecificação pronta, respeitando o piso de margem.</li>
             <li className="flex gap-2"><Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-foreground/60" />Cobrança: R$ 24,9 mi vencidos. Agente tem script de acordo; aprovação humana acima de R$ 500 mil.</li>
           </ul>
           <div className="mt-3 border-t pt-3">
@@ -209,7 +211,7 @@ export function VisaoGeral({ sim, tema, onNav }: ViewProps) {
           </div>
         </PanelCard>
 
-        <PanelCard className="xl:col-span-4" title="Volume por hora" sub="Saiu da base · 14 horas (simulação)">
+        <PanelCard className="xl:col-span-4" title="Volume por hora (m³)" sub="Saiu das bases · 14 horas (simulação)">
           <HoraChart tema={tema} />
           <div className="mt-2 grid grid-cols-3 gap-2">
             {[
@@ -234,7 +236,7 @@ export function VisaoGeral({ sim, tema, onNav }: ViewProps) {
         <PanelCard className="xl:col-span-7" title="A fila de pedidos atravessa 8 sistemas sem toque humano" sub="No modo manual, cada etapa depende de alguém digitar, ligar ou conferir.">
           <FunilSistemas sim={sim} />
         </PanelCard>
-        <PanelCard className="xl:col-span-5" title="Margem bruta por produto" sub="Média das bases monitoradas (simulação)">
+        <PanelCard className="xl:col-span-5" title="Margem bruta por produto (R$/m³)" sub="Preço de venda − custo de reposição, média das bases (simulação)">
           <MargemProdutos sim={sim} tema={tema} />
           <div className="mt-2 grid grid-cols-2 gap-2 text-[10.5px] text-muted-foreground">
             <p className="rounded-lg bg-secondary px-2.5 py-1.5">Diesel responde por <span className="font-semibold text-foreground">62% do volume</span></p>
@@ -292,13 +294,8 @@ function LinhaOrdem({ o, manual }: { o: Ordem; manual: boolean }) {
 function MargemProdutos({ sim, tema }: { sim: SimData; tema: Tema }) {
   const th = chartTheme(tema);
   const data = useMemo(() => {
-    const acc: Record<string, { m: number; n: number }> = {};
-    for (const p of sim.precos) {
-      acc[p.produto] = acc[p.produto] ?? { m: 0, n: 0 };
-      acc[p.produto].m += ((p.preco - p.custo) / p.custo) * 100;
-      acc[p.produto].n += 1;
-    }
-    return PRODUTOS.filter((p) => acc[p]).map((p) => ({ p, m: +(acc[p].m / acc[p].n).toFixed(2) }));
+    const m = margemPorProduto(sim.precos);
+    return PRODUTOS.filter((p) => m[p] !== undefined).map((p) => ({ p, m: +m[p].toFixed(2) }));
   }, [sim.precos]);
   return (
     <div className="h-40">
@@ -306,9 +303,9 @@ function MargemProdutos({ sim, tema }: { sim: SimData; tema: Tema }) {
         <BarChart data={data} margin={{ top: 6, right: 8, bottom: 0, left: -18 }}>
           <CartesianGrid stroke={th.grid} vertical={false} />
           <XAxis dataKey="p" tick={{ ...th.tick, fontSize: 9 }} axisLine={false} tickLine={false} interval={0} />
-          <YAxis tick={th.tick} axisLine={false} tickLine={false} tickFormatter={(v) => Number(v) + "%"} />
-          <Tooltip contentStyle={th.tip} formatter={(v) => fmtDec(Number(v), 2) + "%"} />
-          <Bar dataKey="m" radius={[5, 5, 0, 0]}>
+          <YAxis tick={th.tick} axisLine={false} tickLine={false} tickFormatter={(v) => "R$ " + Number(v)} />
+          <Tooltip contentStyle={th.tip} formatter={(v) => fmtRs(Number(v)) + "/m³"} />
+          <Bar dataKey="m" radius={[5, 5, 0, 0]} isAnimationActive={false}>
             {data.map((d) => (
               <Cell key={d.p} fill={prodTone(d.p, tema)} />
             ))}
@@ -402,7 +399,7 @@ export function PrecificacaoView({ sim, tema }: ViewProps) {
   const sens = useMemo(
     () =>
       [
-        { f: "Brent +1%", m: 0.21 },
+        { f: "Reajuste do fornecedor +1%", m: 0.21 },
         { f: "Câmbio +1%", m: 0.16 },
         { f: "ICMS estado vizinho", m: 0.34 },
         { f: "Concorrente -1%", m: -0.27 },
@@ -413,14 +410,14 @@ export function PrecificacaoView({ sim, tema }: ViewProps) {
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <Stat label="Preços recalculados hoje" value={sim.modo === "integrada" ? fmtInt(1_860 + sim.tick * 12) : "120 (manuais)"} nota="custo + frete + concorrência" />
-        <Stat label="Margem média" value={fmtDec(sim.margem) + "%"} delta={sim.modo === "integrada" ? "▲ +0,9 p.p. desde 6h" : "▼ -0,3 p.p."} />
+        <Stat label="Margem média" value={fmtRs(+margemRsM3(sim.precos).toFixed(2)) + "/m³"} delta={sim.modo === "integrada" ? "▲ desde 6h" : "▼ desde 6h"} />
         <Stat label="Ciclo de reação" value={sim.modo === "integrada" ? "30 s" : "1-2 dias"} nota="tabela editada à mão hoje" />
         <Stat label="Risco de guerra de preço" value={sim.modo === "integrada" ? "baixo" : "alto"} nota="piso de margem por base" />
       </div>
 
       <PanelCard
         title="Copiloto de preço por base × produto"
-        sub="Sugestão recalculada com Brent, câmbio e preço do vizinho. Você aprova — piso de margem é regra, não exceção."
+        sub="Sugestão recalculada com custo de reposição, tributos, frete e preço do vizinho. Você aprova — piso de margem é regra, não exceção."
         action={<Badge variant="secondary">copiloto</Badge>}
       >
         <Table>
@@ -461,7 +458,7 @@ export function PrecificacaoView({ sim, tema }: ViewProps) {
                     )}
                   </TableCell>
                   <TableCell className="py-2 text-right">
-                    {p.base === "Pojuca" ? (
+                    {p.base === "Camaçari" ? (
                       p.aplicado ? (
                         <Badge variant="secondary" className="text-[9.5px]">aplicado</Badge>
                       ) : sim.modo === "integrada" ? (
@@ -634,7 +631,7 @@ export function SuprimentoView({ sim, tema }: ViewProps) {
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <Stat label="Cobertura média" value={fmtDec(sim.tanques.reduce((a, t) => a + t.cover, 0) / sim.tanques.length, 0) + " dias"} nota="reposição antecipada pela previsão" />
         <Stat label="Tanques críticos" value={String(sim.tanques.filter((t) => t.critico).length)} nota={sim.modo === "integrada" ? "reposição já acionada" : "descoberta na hora"} />
-        <Stat label="Custo médio (R$/L)" value={fmtDec(sim.precos.reduce((a, p) => a + p.custo, 0) / sim.precos.length, 3)} delta="▲ +1,1%" nota="Brent + câmbio refletidos" />
+        <Stat label="Custo médio (R$/L)" value={fmtDec(sim.precos.reduce((a, p) => a + p.custo, 0) / sim.precos.length, 3)} delta="▲ +1,1%" nota="custo de reposição por base" />
         <Stat label="Compras em aberto" value="3 POs" nota="confirmadas com refinaria/trading" />
       </div>
 
@@ -663,7 +660,7 @@ export function SuprimentoView({ sim, tema }: ViewProps) {
         </PanelCard>
 
         <div className="space-y-3 xl:col-span-6">
-          <PanelCard title="Custo de aquisição (R$/L)" sub="14 dias · Brent e câmbio refletidos no custo" action={<Badge variant="secondary">copiloto de compra</Badge>}>
+          <PanelCard title="Custo de aquisição (R$/L)" sub="14 dias · reajustes do fornecedor e subvenção refletidos" action={<Badge variant="secondary">copiloto de compra</Badge>}>
             <div className="h-36">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={custo} margin={{ top: 6, right: 8, bottom: 0, left: -12 }}>
@@ -809,7 +806,7 @@ export function FinanceiroView({ sim, tema }: ViewProps) {
         <Stat label="Receita do dia" value={fmtMi(sim.receita)} delta={sim.modo === "integrada" ? "▲ +11,2%" : "▼ +5,6%"} />
         <Stat label="Títulos vencidos (>30d)" value={fmtRs(totalVencido)} nota="fila sob gestão do agente" />
         <Stat label="DSO" value={dso + " dias"} delta={sim.modo === "integrada" ? "▲ -9 dias vs. manual" : "▼ +4 dias vs. meta"} />
-        <Stat label="Margem bruta" value={fmtDec(sim.margem) + "%"} nota={sim.modo === "integrada" ? "copiloto no controle" : "caindo com preço do vizinho"} />
+        <Stat label="Margem bruta" value={fmtRs(+margemRsM3(sim.precos).toFixed(2)) + "/m³"} nota={sim.modo === "integrada" ? "copiloto no controle" : "caindo com preço do vizinho"} />
       </div>
 
       <div className="grid gap-3 xl:grid-cols-12">
@@ -1144,6 +1141,7 @@ export const VIEW_MAP: Record<ViewId, (p: ViewProps) => ReactElement> = {
   logistica: LogisticaView,
   financeiro: FinanceiroView,
   fiscal: (p) => <RegulacaoView sim={p.sim} />,
+  calor: (p) => <MapaCalor key={p.tema} tema={p.tema} />,
   ia: CentroIAView,
   seguranca: SegurancaView,
 };

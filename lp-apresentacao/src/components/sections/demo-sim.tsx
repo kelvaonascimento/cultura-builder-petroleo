@@ -4,9 +4,31 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 /* ---------- formatação ---------- */
 export const fmtInt = (v: number) => v.toLocaleString("pt-BR", { maximumFractionDigits: 0 });
-export const fmtRs = (v: number) => "R$ " + v.toLocaleString("pt-BR", { maximumFractionDigits: 0 });
-export const fmtMi = (v: number) =>
-  "R$ " + v.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " mi";
+// dinheiro sempre exato (regra do painel): centavos só somem quando são zero
+export const fmtRs = (v: number) => "R$ " + v.toLocaleString("pt-BR", { minimumFractionDigits: Number.isInteger(v) ? 0 : 2, maximumFractionDigits: 2 });
+export const fmtMi = (v: number) => "R$ " + v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+// margem bruta em R$/m³ (unidade do setor), ponderada pelo mix de vendas da empresa fictícia
+const MIX: Record<string, number> = { "Diesel S10": 0.36, "Gasolina C": 0.37, "Diesel S500": 0.15, Etanol: 0.12 };
+export function margemPorProduto(precos: { produto: string; preco: number; custo: number }[]) {
+  const acc: Record<string, { s: number; n: number }> = {};
+  for (const p of precos) {
+    acc[p.produto] = acc[p.produto] ?? { s: 0, n: 0 };
+    acc[p.produto].s += (p.preco - p.custo) * 1000;
+    acc[p.produto].n += 1;
+  }
+  return Object.fromEntries(Object.entries(acc).map(([k, v]) => [k, v.s / v.n]));
+}
+export function margemRsM3(precos: { produto: string; preco: number; custo: number }[]) {
+  const m = margemPorProduto(precos);
+  let soma = 0;
+  let peso = 0;
+  for (const [k, v] of Object.entries(m)) {
+    soma += v * (MIX[k] ?? 0);
+    peso += MIX[k] ?? 0;
+  }
+  return peso ? soma / peso : 0;
+}
 export const fmtDec = (v: number, d = 1) =>
   v.toLocaleString("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d });
 export const fmtMin = (m: number) =>
@@ -95,7 +117,7 @@ export const SISTEMAS = [
 export const JORNADA = [
   "Pedido chega pelo portal — 2 min, cotação pré-calculada. Hoje: WhatsApp solto, transcrição manual.",
   "Scoring automático: 18 meses de histórico, limite pré-aprovado. Hoje: 1-3 dias por e-mail.",
-  "Copiloto: custo base + frete + margem regional, recalculado com Brent e câmbio. Hoje: tabela e planilha.",
+  "Copiloto: custo de reposição (Petrobras/importação) + tributos + frete + margem da praça, recalculado a cada reajuste. Hoje: tabela e planilha.",
   "Volume reservado na base; reposição antecipada pela previsão. Hoje: falta descoberta na hora.",
   "Rota com cargas agrupadas: menos km vazio; janela aceita no portal. Hoje: despachante.",
   "Telemetria ao vivo; desvio acima de 5 km aciona alerta. Hoje: posto liga para perguntar.",
@@ -154,17 +176,17 @@ function rndMotorista(i: number) {
 
 function novaRota(i: number, minuto: number, integrada: boolean): Rota {
   const pares: [string, string][] = [
-    ["SFC", "Feira de Santana"],
-    ["Pojuca", "Camaçari"],
-    ["LEM", "Irecê"],
-    ["SFC", "Santo Amaro"],
-    ["Pojuca", "Salvador"],
+    ["Litoral", "Feira de Santana"],
+    ["Camaçari", "Camaçari"],
+    ["Barreiras", "Irecê"],
+    ["Litoral", "Santo Amaro"],
+    ["Camaçari", "Salvador"],
     ["Itabuna", "Ilhéus"],
     ["Barreiras", "Bom Jesus da Lapa"],
     ["Juazeiro", "Paulo Afonso"],
-    ["SFC", "Vitória da Conquista"],
-    ["Pojuca", "Alagoinhas"],
-    ["LEM", "Barreiras"],
+    ["Litoral", "Vitória da Conquista"],
+    ["Camaçari", "Alagoinhas"],
+    ["Barreiras", "Barreiras"],
     ["Juazeiro", "Irecê"],
   ];
   const par = pares[i % pares.length];
@@ -202,19 +224,19 @@ export { serieDias };
 
 const EVENTOS_IA: [string, string][] = [
   ["IA", "Pedido movido para roteirização sem toque humano."],
-  ["PREÇO", "Copiloto recalculou 480 preços com Brent e câmbio."],
+  ["PREÇO", "Copiloto recalculou 480 preços com o novo custo de reposição."],
   ["LOG", "Caminhão entregue dentro da janela — comprovante digital assinado."],
   ["FISC", "Volumes reconciliados no consolidado ANP/RenovaBio."],
   ["REDE", "Posto Cordeiro: demanda +9% — IA sugere escalar volume."],
   ["CRÉD", "Consulta de crédito concluída em 40 segundos."],
   ["COBR", "Acordo de pagamento fechado por agente — parcelamento aceito."],
   ["SEG", "Padrão de lavração detectado: 3 tanques divergentes — auditoria aberta."],
-  ["TRAD", "Carga antecipada: Brent subiu 1,4% — janela de compra aproveitada."],
+  ["TRAD", "Brent e câmbio fecharam a janela de importação: compra redirecionada ao fornecedor nacional."],
   ["REDE", "Câmeras + IA: 2 abastecimentos com padrão de bomba-truque — OS aberta."],
 ];
 
 const EVENTOS_MAN: [string, string][] = [
-  ["ALERTA", "Tanque de Pojuca consumindo sem reposição automática."],
+  ["ALERTA", "Tanque de Camaçari consumindo sem reposição automática."],
   ["B2B", "Cotação sem resposta há 41h — vendedor não lembrou."],
   ["PREÇO", "Concorrente tomou o bico: preço recalculado manualmente."],
   ["LOG", "Entrega fora da janela — reagendada por telefone."],
@@ -234,8 +256,9 @@ export function useSim(): SimData {
     modoRef.current = modo;
   }, [modo]);
 
-  const [volume, setVolume] = useState(1_240_000);
-  const [receita, setReceita] = useState(7_340_000);
+  // porte calibrado numa regional grande (~7.800 m³/dia); preço médio de venda ≈ R$ 5,44/L pelo mix
+  const [volume, setVolume] = useState(2_350_000);
+  const [receita, setReceita] = useState(12_784_000);
   const [margem, setMargem] = useState(2.38);
   const [janela, setJanela] = useState(96);
   const [kmVazio, setKmVazio] = useState(9.2);
@@ -258,7 +281,7 @@ export function useSim(): SimData {
 
   const [tanques, setTanques] = useState<Tanque[]>([
     { base: "São Francisco do Conde", produto: "Diesel S10", nivel: 62, cover: 9, critico: false, repostaEm: 0 },
-    { base: "Pojuca", produto: "Diesel S10", nivel: 54, cover: 8, critico: false, repostaEm: 0 },
+    { base: "Camaçari", produto: "Diesel S10", nivel: 54, cover: 8, critico: false, repostaEm: 0 },
     { base: "Luís E. Magalhães", produto: "Gasolina C", nivel: 71, cover: 10, critico: false, repostaEm: 0 },
     { base: "Suape", produto: "Diesel S500", nivel: 47, cover: 7, critico: false, repostaEm: 0 },
     { base: "Feira de Santana", produto: "Multi", nivel: 58, cover: 8, critico: false, repostaEm: 0 },
@@ -270,17 +293,17 @@ export function useSim(): SimData {
   );
 
   const [precos, setPrecos] = useState<PrecoLinha[]>([
-    { produto: "Diesel S10", base: "SFC", preco: 5.842, custo: 5.412, sugerido: 5.891, concorrente: 5.918, aplicado: false },
-    { produto: "Gasolina C", base: "Pojuca", preco: 5.31, custo: 4.882, sugerido: 5.398, concorrente: 5.345, aplicado: false },
+    { produto: "Diesel S10", base: "Litoral", preco: 5.842, custo: 5.412, sugerido: 5.891, concorrente: 5.918, aplicado: false },
+    { produto: "Gasolina C", base: "Camaçari", preco: 5.31, custo: 4.882, sugerido: 5.398, concorrente: 5.345, aplicado: false },
     { produto: "Diesel S500", base: "Suape", preco: 5.795, custo: 5.388, sugerido: 5.842, concorrente: 5.861, aplicado: false },
-    { produto: "Etanol", base: "LEM", preco: 4.19, custo: 3.72, sugerido: 4.252, concorrente: 4.208, aplicado: false },
+    { produto: "Etanol", base: "Barreiras", preco: 4.19, custo: 3.72, sugerido: 4.252, concorrente: 4.208, aplicado: false },
     { produto: "Diesel S10", base: "Barreiras", preco: 5.918, custo: 5.462, sugerido: 5.987, concorrente: 6.012, aplicado: false },
     { produto: "Gasolina C", base: "Itabuna", preco: 5.276, custo: 4.845, sugerido: 5.362, concorrente: 5.29, aplicado: false },
   ]);
 
   const [eventos, setEventos] = useState<Evento[]>([
-    { t: 0, tipo: "IA", msg: "Previsão de demanda LEM: +8% na quinzena do dia 12." },
-    { t: 0, tipo: "LOG", msg: "Rota Feira de Santana → LEM reordenada: -12% km vazio." },
+    { t: 0, tipo: "IA", msg: "Previsão de demanda Barreiras: +8% na quinzena do dia 12." },
+    { t: 0, tipo: "LOG", msg: "Rota Feira de Santana → Barreiras reordenada: -12% km vazio." },
     { t: 0, tipo: "CRÉD", msg: "Limite pré-aprovado: Posto Vale Verde R$ 340 mil." },
   ]);
 
@@ -293,7 +316,7 @@ export function useSim(): SimData {
     { id: "F-2235", posto: "Posto Lago Azul", valor: 18_900, dias: 3, status: "aguardando" },
   ]);
   const [incidentes] = useState<Incidente[]>([
-    { id: "INC-81", tipo: "Divergência de tanque (lavração?)", local: "Base Pojuca", nivel: "medio", status: "investigando", ts: 240 },
+    { id: "INC-81", tipo: "Divergência de tanque (lavração?)", local: "Base Camaçari", nivel: "medio", status: "investigando", ts: 240 },
     { id: "INC-82", tipo: "Padrão de bomba-truque", local: "Posto Almeida · Camaçari", nivel: "alto", status: "OS aberta", ts: 288 },
     { id: "INC-83", tipo: "Desvio de rota 22 km", local: "Caminhão RTX-1A90", nivel: "baixo", status: "resolvido", ts: 312 },
   ]);
@@ -314,8 +337,9 @@ export function useSim(): SimData {
       const m = modoRef.current;
       tickRef.current += 1;
       setTick((t) => t + 1);
-      setVolume((v) => v + (m === "integrada" ? 9000 + Math.round(Math.random() * 6000) : 5200 + Math.round(Math.random() * 3200)));
-      setReceita((r) => r + (m === "integrada" ? 52_000 + Math.round(Math.random() * 26_000) : 30_000 + Math.round(Math.random() * 16_000)));
+      const inc = (m === "integrada" ? 36 + Math.round(Math.random() * 24) : 21 + Math.round(Math.random() * 13)) * 1000;
+      setVolume((v) => v + inc);
+      setReceita((r) => Math.round((r + inc * 5.44) * 100) / 100);
       setNfe((n) => n + (m === "integrada" ? 14 + Math.round(Math.random() * 12) : 6 + Math.round(Math.random() * 6)));
 
       const alvoMargem = m === "integrada" ? 2.86 : 2.06;
@@ -386,7 +410,7 @@ export function useSim(): SimData {
       /* tanques */
       setTanques((ts) =>
         ts.map((tq) => {
-          let nivel = tq.nivel - (tq.base === "Pojuca" ? 1.7 : 1.1);
+          let nivel = tq.nivel - (tq.base === "Camaçari" ? 1.7 : 1.1);
           let repostaEm = tq.repostaEm;
           if (m === "integrada") {
             if (repostaEm > 0) {
@@ -476,9 +500,9 @@ export function useSim(): SimData {
 
   const acoes = useMemo(
     () => [
-      { tipo: "PREÇO", msg: "Gasolina em Pojuca R$ 0,04 abaixo do piso de margem.", acao: "Aplicar +1,2%", chave: "preco-pojuca", usada: precos.some((p) => p.base === "Pojuca" && p.aplicado), view: "precos" },
+      { tipo: "PREÇO", msg: "Gasolina em Camaçari R$ 0,04 abaixo do piso de margem.", acao: "Aplicar +1,2%", chave: "preco-pojuca", usada: precos.some((p) => p.base === "Camaçari" && p.aplicado), view: "precos" },
       { tipo: "SUPRI", msg: "Demanda +8% na quinzena do dia 12 — antecipar 2 cargas.", acao: "Antecipar carga", chave: "supri-antecipa", usada: aplicadas.includes("supri-antecipa"), view: "suprimento" },
-      { tipo: "LOG", msg: "Reordenar Feira → LEM economiza 26 km de vazio.", acao: "Reordenar rota", chave: "log-reordena", usada: aplicadas.includes("log-reordena"), view: "logistica" },
+      { tipo: "LOG", msg: "Reordenar Feira → Barreiras economiza 26 km de vazio.", acao: "Reordenar rota", chave: "log-reordena", usada: aplicadas.includes("log-reordena"), view: "logistica" },
       { tipo: "CRÉD", msg: "Rede Xavier sem resposta há 41h — follow-up com crédito em destaque.", acao: "Enviar follow-up", chave: "cred-follow", usada: aplicadas.includes("cred-follow"), view: "comercial" },
       { tipo: "COBR", msg: "R$ 24,9 mi vencidos — agente de cobrança pronto para negociar.", acao: "Rodar cobrança", chave: "cobr-rodar", usada: aplicadas.includes("cobr-rodar"), view: "financeiro" },
       { tipo: "FISC", msg: "Consolidado ANP do dia pronto para conferência.", acao: "Assinar consolidado", chave: "fiscal-anp", usada: aplicadas.includes("fiscal-anp"), view: "fiscal" },
@@ -489,12 +513,12 @@ export function useSim(): SimData {
   const executarAcao = (chave: string) => {
     if (modo !== "integrada") return;
     if (chave === "preco-pojuca") {
-      setPrecos((ps) => ps.map((p) => (p.base === "Pojuca" ? { ...p, preco: p.sugerido, aplicado: true } : p)));
-      setToast("Aplicado: gasolina Pojuca reprecificada (+1,2% de margem).");
+      setPrecos((ps) => ps.map((p) => (p.base === "Camaçari" ? { ...p, preco: p.sugerido, aplicado: true } : p)));
+      setToast("Aplicado: gasolina Camaçari reprecificada (+1,2% de margem).");
     }
     if (chave === "supri-antecipa") {
-      setTanques((ts) => ts.map((tq) => (tq.base === "Luís E. Magalhães" || tq.base === "Pojuca" ? { ...tq, nivel: Math.min(96, tq.nivel + 22), repostaEm: 0 } : tq)));
-      setToast("Aplicado: 2 cargas antecipadas para LEM e Pojuca.");
+      setTanques((ts) => ts.map((tq) => (tq.base === "Luís E. Magalhães" || tq.base === "Camaçari" ? { ...tq, nivel: Math.min(96, tq.nivel + 22), repostaEm: 0 } : tq)));
+      setToast("Aplicado: 2 cargas antecipadas para Barreiras e Camaçari.");
     }
     if (chave === "log-reordena") {
       setRotas((rs) => rs.map((r) => (r.para === "Irecê" || r.para === "Bom Jesus da Lapa" ? { ...r, prog: Math.min(99, r.prog + 9), atrasada: false } : r)));
@@ -535,7 +559,7 @@ export function useSim(): SimData {
 
 function ultimaAcao(id: string): string {
   const mapa: Record<string, string[]> = {
-    preco: ["R$: gasolina Pojuca +1,2%", "R$: diesel Barreiras -0,4%", "R$: etanol LEM reprecificado"],
+    preco: ["R$: gasolina Camaçari +1,2%", "R$: diesel Barreiras -0,4%", "R$: etanol Barreiras reprecificado"],
     fiscal: ["ICMS AL conferido", "NF-e 1.247 validadas", "Consolidado ANP enviado"],
     rota: ["Rota 0412 reagrupada", "Janela Camaçari confirmada", "Carga dupla: -26 km"],
     credito: ["Limite R$ 180 mi ok", "Score reavaliado", "Limite ampliado: Vale Verde"],
