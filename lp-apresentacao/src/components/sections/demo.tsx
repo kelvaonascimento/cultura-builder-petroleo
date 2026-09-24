@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { CheckCircle2, CircleDot, Sparkles } from "lucide-react";
-import { useSim, type Modo, type SimData, type Tema } from "./demo-sim";
+import { margemRsM3, useSim, type Modo, type SimData, type Tema } from "./demo-sim";
 import { JornadaStrip, VIEW_DEFS, VIEW_MAP, type ViewId } from "./demo-views";
 import { FaixaMercado } from "@/demo/faixa-mercado";
+import { Copiloto } from "@/demo/copiloto";
 
 const CHIPS = ["empresa fictícia", "porte de regional top 5", "5 bases próprias", "24 praças", "30 rotas", "170 postos bandeirados"];
 
@@ -18,7 +19,7 @@ export function Demo() {
 
   return (
     <div id="demo" className={`${tema === "dark" ? "dark " : ""}demo-scope relative mx-auto max-w-[1200px] rounded-3xl bg-background ring-1 ring-foreground/10 shadow-[0_24px_80px_rgba(0,0,0,0.35)] p-3 sm:p-4 transition-colors`}>
-      <Topo sim={sim} tema={tema} setTema={setTema} />
+      <Topo sim={sim} tema={tema} setTema={setTema} tela={VIEW_DEFS.find((d) => d.id === view)?.label ?? ""} />
       <div className="mt-3">
         <FaixaMercado />
       </div>
@@ -43,7 +44,21 @@ export function Demo() {
   );
 }
 
-function Topo({ sim, tema, setTema }: { sim: SimData; tema: Tema; setTema: (t: Tema) => void }) {
+function Topo({ sim, tema, setTema, tela }: { sim: SimData; tema: Tema; setTema: (t: Tema) => void; tela: string }) {
+  // retrato do painel simulado que o copiloto recebe junto com os dados públicos
+  const painel = {
+    tela_aberta: tela,
+    modo: sim.modo === "integrada" ? "Integrada (agentes de IA ativos)" : "Manual (processos humanos)",
+    hora: sim.hora,
+    volume_do_dia_m3: Math.round(sim.volume / 1000),
+    receita_do_dia_rs: sim.receita,
+    margem_bruta_rs_por_m3: +margemRsM3(sim.precos).toFixed(2),
+    janela_cumprida_pct: sim.janela,
+    km_vazio_pct: sim.kmVazio,
+    alertas_abertos: sim.alertas,
+    precos_por_base: sim.precos.map((p) => ({ produto: p.produto, base: p.base, preco_venda_rs_l: p.preco, custo_reposicao_rs_l: p.custo, preco_concorrente_rs_l: p.concorrente })),
+    observacao: "todos os números deste bloco são SIMULADOS",
+  };
   return (
     <header className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl bg-card px-4 py-3 ring-1 ring-foreground/[0.07]">
       <div className="flex items-center gap-2.5">
@@ -59,6 +74,7 @@ function Topo({ sim, tema, setTema }: { sim: SimData; tema: Tema; setTema: (t: T
         ))}
       </div>
       <div className="ml-auto flex items-center gap-3">
+        <Copiloto painel={painel} />
         <span className="text-[11px] tabular-nums text-muted-foreground">{sim.hora}</span>
         <Segmented
           opcoes={[
