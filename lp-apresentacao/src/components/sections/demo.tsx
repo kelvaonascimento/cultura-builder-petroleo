@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CheckCircle2, CircleDot, Sparkles } from "lucide-react";
 import { useSim, type Modo, type SimData, type Tema } from "./demo-sim";
 import { JornadaStrip, VIEW_DEFS, VIEW_MAP, type ViewId } from "./demo-views";
+import { FaixaMercado } from "@/demo/faixa-mercado";
 
 const CHIPS = ["empresa fictícia", "R$ 7,2 bi/ano", "142 postos", "20 bases", "640 mil CBIOs/ano"];
 
@@ -18,6 +19,9 @@ export function Demo() {
   return (
     <div id="demo" className={`${tema === "dark" ? "dark " : ""}demo-scope relative mx-auto max-w-[1200px] rounded-3xl bg-background ring-1 ring-foreground/10 shadow-[0_24px_80px_rgba(0,0,0,0.35)] p-3 sm:p-4 transition-colors`}>
       <Topo sim={sim} tema={tema} setTema={setTema} />
+      <div className="mt-3">
+        <FaixaMercado />
+      </div>
       <div className="mt-3 grid gap-3 lg:grid-cols-[200px_1fr]">
         <Lateral view={view} onNav={setView} />
         <div className="min-h-[560px]">

@@ -163,7 +163,9 @@ export default function MapaOperacao({ tema = "light", altura = 520, onEmRota }:
   const overlay = useRef<MapboxOverlay | null>(null);
   const temaRef = useRef(tema);
   const onEmRotaRef = useRef(onEmRota);
-  onEmRotaRef.current = onEmRota;
+  useEffect(() => {
+    onEmRotaRef.current = onEmRota;
+  }, [onEmRota]);
   const [rotas, setRotas] = useState<RotaGeo[] | null>(null);
   const [sel, setSel] = useState<Selecao>(null);
   const [emRota, setEmRota] = useState(0);

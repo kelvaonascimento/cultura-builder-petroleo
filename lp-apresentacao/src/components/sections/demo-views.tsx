@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/table";
 import { chartTheme, fmtDec, fmtInt, fmtMi, fmtRs, PAL, POSTOS, prodTone, PRODUTOS, SISTEMAS, serieDias, type Ordem, type SimData, type Tema } from "./demo-sim";
 import { MapaOperacao } from "@/demo/mapa";
+import { RegulacaoView } from "@/demo/regulacao";
 
 export type ViewId =
   | "visao"
@@ -57,7 +58,7 @@ export const VIEW_DEFS: { id: ViewId; grupo: string; label: string; sub: string 
   { id: "suprimento", grupo: "Operação", label: "Suprimento", sub: "Tanques, compras e custos" },
   { id: "logistica", grupo: "Operação", label: "Logística", sub: "Rotas, frota e janelas" },
   { id: "financeiro", grupo: "Financeiro", label: "Financeiro & Caixa", sub: "Fluxo, aging e cobrança" },
-  { id: "fiscal", grupo: "Back-office", label: "Fiscal & ANP", sub: "Apuração, ANP e RenovaBio" },
+  { id: "fiscal", grupo: "Back-office", label: "Regulação ao vivo", sub: "Normas, prazos e agentes" },
   { id: "ia", grupo: "Inteligência", label: "Centro de IA", sub: "Agentes operando o fluxo" },
   { id: "seguranca", grupo: "Inteligência", label: "Segurança & Compliance", sub: "Trilha, controles e LGPD" },
 ];
@@ -1142,7 +1143,7 @@ export const VIEW_MAP: Record<ViewId, (p: ViewProps) => ReactElement> = {
   suprimento: SuprimentoView,
   logistica: LogisticaView,
   financeiro: FinanceiroView,
-  fiscal: FiscalView,
+  fiscal: (p) => <RegulacaoView sim={p.sim} />,
   ia: CentroIAView,
   seguranca: SegurancaView,
 };
