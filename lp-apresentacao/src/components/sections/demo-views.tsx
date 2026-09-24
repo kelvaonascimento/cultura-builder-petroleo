@@ -15,7 +15,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { ArrowDownRight, ArrowUpRight, Bot, CheckCircle2, Clock3, FileText, Fuel, Lock, Radar, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Bot, CheckCircle2, Clock3, Fuel, Radar, ShieldCheck, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -868,85 +868,6 @@ export function FinanceiroView({ sim, tema }: ViewProps) {
 }
 
 /* ================= 8 · Fiscal & ANP ================= */
-
-export function FiscalView({ sim, tema }: ViewProps) {
-  const cbioObrig = 640_000;
-  const cbioEmit = 612_400;
-  const pct = (cbioEmit / cbioObrig) * 100;
-  const R = 52;
-  const C = 2 * Math.PI * R;
-  const pal = PAL[tema];
-  return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <Stat label="NF-e emitidas hoje" value={fmtInt(sim.nfe)} nota={sim.modo === "integrada" ? "0 retrabalho fiscal" : "conferência manual pendente"} />
-        <Stat label="ICMS apurado (IA)" value="R$ 1,42 mi" nota="por estado e alíquota, no ato da venda" />
-        <Stat label="CBIOs pendentes" value={fmtInt(cbioObrig - cbioEmit)} nota="RenovaBio · meta trimestral" />
-        <Stat label="Relatórios ANP" value="0 em atraso" nota="consolidado diário automático" />
-      </div>
-
-      <div className="grid grid-cols-1 gap-3 xl:grid-cols-12">
-        <PanelCard className="xl:col-span-4" title="RenovaBio · CBIOs" sub="Obrigação estimada vs. emitido no período (simulação)">
-          <div className="flex items-center justify-center gap-5">
-            <svg viewBox="0 0 130 130" className="h-32 w-32">
-              <circle cx="65" cy="65" r={R} fill="none" stroke="currentColor" strokeWidth="10" className="text-foreground/10" />
-              <circle cx="65" cy="65" r={R} fill="none" stroke={pal.s1} strokeWidth="10" strokeLinecap="round" strokeDasharray={`${(C * pct) / 100} ${C}`} transform="rotate(-90 65 65)" />
-              <text x="65" y="61" textAnchor="middle" fontSize="19" fontWeight="700" fill={pal.s1}>{fmtDec(pct, 1)}%</text>
-              <text x="65" y="79" textAnchor="middle" fontSize="9" fill={pal.s2}>da meta</text>
-            </svg>
-            <div className="space-y-1.5 text-[11px]">
-              <p className="text-muted-foreground">Obrigação: <span className="font-semibold text-foreground">{fmtInt(cbioObrig)}</span></p>
-              <p className="text-muted-foreground">Emitidos: <span className="font-semibold text-foreground">{fmtInt(cbioEmit)}</span></p>
-              <p className="text-muted-foreground">Divergências: <span className="font-semibold text-foreground">2 em conferência</span></p>
-            </div>
-          </div>
-        </PanelCard>
-
-        <PanelCard className="xl:col-span-4" title="IBS/CBS — transição em curso" sub="A reforma tributária muda a nota fiscal de todos. Os agentes já operam os dois modelos.">
-          <div className="space-y-2">
-            {[
-              ["2026 · sistema de teste", "Emissões paralelas IBS/CBS nos pedidos-piloto.", "ok"],
-              ["2027 · convivência", "ICMS + IBS/CBS lado a lado por operação.", "alerta"],
-              ["2029 · extinção gradual", "Alíquota plena — apuração recalculada por agente.", "neutro"],
-            ].map(([t, d, tone]) => (
-              <div key={t} className="rounded-xl bg-secondary px-3 py-2.5">
-                <p className="flex items-center gap-2 text-[11.5px] font-semibold text-foreground"><FileText className="h-3.5 w-3.5 text-muted-foreground" />{t}</p>
-                <p className="mt-1 text-[10.5px] leading-snug text-muted-foreground">{d}</p>
-                <Badge variant={tone === "ok" ? "secondary" : tone === "alerta" ? "outline" : "secondary"} className="mt-1.5 text-[9px]">{tone === "ok" ? "piloto rodando" : tone === "alerta" ? "mapeado" : "preparado"}</Badge>
-              </div>
-            ))}
-          </div>
-        </PanelCard>
-
-        <div className="space-y-3 xl:col-span-4">
-          <PanelCard title="Consolidado ANP do dia" sub="Volumes por produto (simulação)">
-            <div className="space-y-2">
-              {PRODUTOS.map((p) => {
-                const vol = sim.precos.filter((x) => x.produto === p).length * 120_000 + 80_000;
-                return (
-                  <div key={p} className="flex items-center gap-2 text-[11px]">
-                    <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: prodTone(p, tema) }} />
-                    <span className="w-20 shrink-0 text-foreground/80">{p}</span>
-                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-foreground/10">
-                      <div className="h-full rounded-full bg-foreground" style={{ width: `${(vol / 500_000) * 100}%` }} />
-                    </div>
-                    <span className="w-16 shrink-0 text-right tabular-nums text-muted-foreground">{fmtInt(vol)} L</span>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="mt-3 border-t pt-3">
-              <AcoesLista sim={sim} />
-            </div>
-          </PanelCard>
-          <PanelCard title="Trilha de auditoria" sub="Tudo que o agente fiscal fez fica registrado" action={<Lock className="h-4 w-4 text-muted-foreground" />}>
-            <FeedEventos sim={sim} max={4} />
-          </PanelCard>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 /* ================= 9 · Centro de IA ================= */
 

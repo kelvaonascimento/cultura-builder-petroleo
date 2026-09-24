@@ -1,4 +1,6 @@
 import { fontes, fontesPrimarias } from "@/lib/data";
+import { CbFooter } from "@/components/cb-footer";
+import { CONTATO, WHATSAPP_DIAGNOSTICO } from "@/lib/contato";
 
 export function Final() {
   return (
@@ -14,6 +16,15 @@ export function Final() {
               Escolhemos juntos um processo da operação — margem por praça, conciliação fiscal, suprimento ou atendimento
               B2B —, medimos quanto tempo ele consome hoje e entregamos um piloto rodando sobre os dados que a empresa já tem.
             </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <a href={WHATSAPP_DIAGNOSTICO} target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center rounded-full bg-[#F4F5F1] px-6 text-[15px] font-medium text-[#0A0A0B] transition-opacity hover:opacity-90">
+                Agendar diagnóstico pelo WhatsApp
+              </a>
+              <a href={`mailto:${CONTATO.email}`} className="inline-flex h-12 items-center rounded-full border border-white/20 px-6 text-[15px] font-medium text-white transition-colors hover:border-white/50">
+                {CONTATO.email}
+              </a>
+            </div>
+            <p className="mt-4 text-sm text-white/50">{CONTATO.telefone}</p>
           </div>
           <h2 className="mt-16 text-2xl font-semibold tracking-tight text-[#1d1d1f] md:text-3xl">
             Como ler esta pesquisa.
@@ -45,7 +56,7 @@ export function Final() {
           </p>
         </div>
       </section>
-      <footer className="bg-[#f5f5f7] py-16">
+      <section aria-label="Fontes" className="bg-[#f5f5f7] py-16">
         <div className="mx-auto max-w-6xl px-6">
           <p className="text-sm font-semibold text-[#6e6e73]">Fontes primárias (indexadas)</p>
           <ul className="mt-4 grid gap-2 text-xs leading-relaxed md:grid-cols-2">
@@ -68,13 +79,10 @@ export function Final() {
               <li key={f}>{f}</li>
             ))}
           </ul>
-          <div className="mt-10 border-t border-[#d2d2d7] pt-6">
-            <p className="text-xs leading-relaxed text-[#86868b]">
-              Cultura Builder · Setembro de 2026 · Todos os números com fonte pública e data de referência.
-            </p>
-          </div>
         </div>
-      </footer>
+      </section>
+      <CbFooter />
+
     </>
   );
 }

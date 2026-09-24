@@ -585,7 +585,7 @@ function ultimaAcao(id: string): string {
     credito: ["Limite R$ 180 mi ok", "Score reavaliado", "Limite ampliado: Vale Verde"],
     cobranca: ["Acordo: 3× parcelas", "Lembrete enviado", "Promessa registrada"],
     prospeccao: ["12 bandeiras brancas mapeadas", "Lead Irecê qualificado", "Script de abordagem enviado"],
-    compliance: ["Auditoria: 3 divergências", "Checklist ANP ok", "CBIO: 100% em dia"],
+    compliance: ["Auditoria: 3 divergências", "Checklist ANP ok", "Meta de CBIO 2026: aposentadoria em dia"],
     vendedor: ["Follow-up: Rede Cliente 318", "Resumo de conta gerado", "Proposta reenviada"],
   };
   const ops = mapa[id] ?? ["Ação executada"];
