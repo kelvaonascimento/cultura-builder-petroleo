@@ -16,7 +16,7 @@ export function Demo() {
   const View = VIEW_MAP[view];
 
   return (
-    <div className={`${tema === "dark" ? "dark " : ""}demo-scope relative mx-auto max-w-[1200px] rounded-3xl bg-background ring-1 ring-foreground/10 shadow-[0_24px_80px_rgba(0,0,0,0.35)] p-3 sm:p-4 transition-colors`}>
+    <div id="demo" className={`${tema === "dark" ? "dark " : ""}demo-scope relative mx-auto max-w-[1200px] rounded-3xl bg-background ring-1 ring-foreground/10 shadow-[0_24px_80px_rgba(0,0,0,0.35)] p-3 sm:p-4 transition-colors`}>
       <Topo sim={sim} tema={tema} setTema={setTema} />
       <div className="mt-3 grid gap-3 lg:grid-cols-[200px_1fr]">
         <Lateral view={view} onNav={setView} />

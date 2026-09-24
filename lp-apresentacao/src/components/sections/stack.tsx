@@ -20,12 +20,13 @@ function Monogram({ name }: { name: string }) {
 }
 
 function Logo({ src, name }: { src: string; name: string }) {
-  if (!src) return <Monogram name={name} />;
+  const [falhou, setFalhou] = useState(false);
+  if (!src || falhou) return <Monogram name={name} />;
   return (
     <div className="flex h-10 w-10 items-center justify-center">
       {/* logos oficiais fornecidos em /logos/softwares — ver licenças no doc 09 */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt={name} className="max-h-10 max-w-10 object-contain" />
+      <img src={src} alt={name} className="max-h-10 max-w-10 object-contain" onError={() => setFalhou(true)} />
     </div>
   );
 }

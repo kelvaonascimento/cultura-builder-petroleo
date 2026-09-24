@@ -29,7 +29,7 @@ const registry: Record<string, LogoEntry> = {
   idaza: { file: "/logos/idaza.svg", alt: "Idaza" },
   fan: { file: "/logos/fan.png", alt: "FAN Distribuidora" },
   stang: { file: "/logos/stang.webp", alt: "Stang Distribuidora" },
-  potencial: { file: "/logos/potencial.png", alt: "Potencial" },
+  potencial: { file: "/logos/potencial.webp", alt: "Potencial" },
 };
 
 const orderedKeys = [

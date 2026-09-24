@@ -72,11 +72,11 @@ export function Hero() {
   return (
     <>
       <header className="sticky top-0 z-50 border-b border-black/5 bg-white/70 backdrop-blur-xl">
-        <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-6">
-          <span className="text-sm font-semibold text-[#1d1d1f]">Cultura Builder</span>
-          <nav className="hidden gap-7 text-xs font-medium text-[#6e6e73] md:flex">
+        <div className="mx-auto flex max-w-6xl flex-col px-6 md:h-12 md:flex-row md:items-center md:justify-between">
+          <span className="flex h-11 items-center text-sm font-semibold text-[#1d1d1f] md:h-auto">Cultura Builder</span>
+          <nav className="-mx-6 flex gap-5 overflow-x-auto px-6 pb-2 text-xs font-medium text-[#6e6e73] [scrollbar-width:none] md:mx-0 md:gap-7 md:overflow-visible md:p-0">
             {nav.map((n) => (
-              <a key={n.href} href={n.href} className="transition-colors hover:text-[#1d1d1f]">
+              <a key={n.href} href={n.href} className="whitespace-nowrap py-1.5 transition-colors hover:text-[#1d1d1f] md:py-0">
                 {n.label}
               </a>
             ))}

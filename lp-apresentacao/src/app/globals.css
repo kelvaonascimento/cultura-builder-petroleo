@@ -127,6 +127,13 @@
   html {
     @apply font-sans;
     scroll-behavior: smooth;
+    /* âncoras do menu param abaixo do header fixo (2 linhas no celular, 1 no desktop) */
+    scroll-padding-top: 5.5rem;
+  }
+  @media (min-width: 768px) {
+    html {
+      scroll-padding-top: 4rem;
+    }
   }
 }
 

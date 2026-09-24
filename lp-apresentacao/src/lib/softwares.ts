@@ -28,7 +28,7 @@ export const SOFTWARES: Software[] = [
   { k: "hubspot", n: "HubSpot", s: "comercial", c: "global", d: "CRM + marketing + service no pacote mid-market", logo: "/logos/softwares/hubspot.svg" },
   { k: "pipedrive", n: "Pipedrive", s: "comercial", c: "global", d: "CRM de pipeline simples para equipes de vendas externas", logo: "/logos/softwares/pipedrive.svg" },
   { k: "rd-station", n: "RD Station", s: "comercial", c: "brasil", d: "Automação de marketing e CRM líder no Brasil", logo: "/logos/softwares/rd-station.png" },
-  { k: "dynamics-365", n: "Microsoft Dynamics 365", s: "comercial", c: "global", d: "CRM/ERP integrado ao ecossistema Microsoft", logo: "/logos/softwares/dynamics-365.png" },
+  { k: "dynamics-365", n: "Microsoft Dynamics 365", s: "comercial", c: "global", d: "CRM/ERP integrado ao ecossistema Microsoft", logo: "/logos/softwares/dynamics-365.svg" },
   { k: "webposto", n: "WebPosto (Webside)", s: "postos", c: "brasil", d: "Retaguarda de postos autodeclarada líder de mercado: volumes, fiscal, cartão", logo: "/logos/softwares/webposto.png" },
   { k: "totvs-postos", n: "TOTVS Postos", s: "postos", c: "brasil", d: "Vertical de postos da TOTVS: retaguarda, conveniência e fiscal", logo: "/logos/softwares/totvs-postos.svg" },
   { k: "argo", n: "Argo Sistemas", s: "postos", c: "brasil", d: "Retaguarda de postos e bandeira branca (RS + 8 estados)", logo: "/logos/softwares/argo.png" },
