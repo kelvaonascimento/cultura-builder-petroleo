@@ -37,8 +37,10 @@ import {
 import { chartTheme, fmtDec, fmtInt, fmtMi, fmtRs, margemPorProduto, margemRsM3, PAL, POSTOS, prodTone, PRODUTOS, SISTEMAS, serieDias, type Ordem, type SimData, type Tema } from "./demo-sim";
 import { MapaCalor, MapaOperacao } from "@/demo/mapa";
 import { RegulacaoView } from "@/demo/regulacao";
+import { MargemPracasView } from "@/demo/margem-pracas";
 
 export type ViewId =
+  | "pracas"
   | "calor"
   | "visao"
   | "comercial"
@@ -55,6 +57,7 @@ export const VIEW_DEFS: { id: ViewId; grupo: string; label: string; sub: string 
   { id: "visao", grupo: "Painel de gestão", label: "Visão geral", sub: "Retrato executivo da operação" },
   { id: "comercial", grupo: "Comercial", label: "Comercial B2B", sub: "Funil, fila de pedidos e crédito" },
   { id: "precos", grupo: "Comercial", label: "Precificação", sub: "Copiloto e margem por região" },
+  { id: "pracas", grupo: "Comercial", label: "Margem por praça", sub: "Base − frete real até a praça" },
   { id: "rede", grupo: "Comercial", label: "Rede & Varejo", sub: "Postos, demanda e captação" },
   { id: "suprimento", grupo: "Operação", label: "Suprimento", sub: "Tanques, compras e custos" },
   { id: "logistica", grupo: "Operação", label: "Logística", sub: "Rotas, frota e janelas" },
@@ -1142,6 +1145,7 @@ export const VIEW_MAP: Record<ViewId, (p: ViewProps) => ReactElement> = {
   financeiro: FinanceiroView,
   fiscal: (p) => <RegulacaoView sim={p.sim} />,
   calor: (p) => <MapaCalor key={p.tema} tema={p.tema} />,
+  pracas: (p) => <MargemPracasView sim={p.sim} tema={p.tema} />,
   ia: CentroIAView,
   seguranca: SegurancaView,
 };
