@@ -1,0 +1,603 @@
+{
+ "_leia": "Malha logística do DEMO. 'real: true' = infraestrutura que existe (refinarias, terminais, portos, dutos). 'real: false' = bases da empresa fictícia (porte calibrado em dados públicos da ANP, cidades deslocadas para não identificar nenhuma distribuidora). 'precisao' diz se a coordenada é da instalação (OpenStreetMap/Nominatim, conferida em 24/09/2026) ou do município. Rotas rodoviárias geradas por scripts/gerar-rotas.mjs (OSRM sobre OpenStreetMap).",
+ "nos": [
+  {
+   "id": "mataripe",
+   "nome": "Refinaria de Mataripe",
+   "tipo": "refinaria",
+   "municipio": "São Francisco do Conde",
+   "uf": "BA",
+   "lat": -12.7072,
+   "lon": -38.5708,
+   "real": true,
+   "precisao": "instalação (OpenStreetMap)",
+   "rotulo": "Refinaria de Mataripe"
+  },
+  {
+   "id": "rnest",
+   "nome": "Refinaria Abreu e Lima (RNEST)",
+   "tipo": "refinaria",
+   "uf": "PE",
+   "lat": -8.3807,
+   "lon": -35.0201,
+   "real": true,
+   "municipio": "Ipojuca",
+   "precisao": "instalação (OpenStreetMap)",
+   "rotulo": "RNEST"
+  },
+  {
+   "id": "replan",
+   "nome": "Refinaria de Paulínia (REPLAN)",
+   "tipo": "refinaria",
+   "municipio": "Paulínia",
+   "uf": "SP",
+   "lat": -22.7288,
+   "lon": -47.1327,
+   "real": true,
+   "precisao": "instalação (OpenStreetMap)",
+   "rotulo": "REPLAN"
+  },
+  {
+   "id": "itaqui",
+   "nome": "Porto do Itaqui",
+   "tipo": "porto",
+   "municipio": "São Luís",
+   "uf": "MA",
+   "lat": -2.5761,
+   "lon": -44.3668,
+   "real": true,
+   "precisao": "instalação (OpenStreetMap)",
+   "rotulo": "Porto do Itaqui"
+  },
+  {
+   "id": "suape",
+   "nome": "Porto de Suape",
+   "tipo": "porto",
+   "municipio": "Ipojuca",
+   "uf": "PE",
+   "lat": -8.3969,
+   "lon": -34.9701,
+   "real": true,
+   "precisao": "instalação (OpenStreetMap)",
+   "rotulo": "Suape"
+  },
+  {
+   "id": "cabedelo",
+   "nome": "Porto de Cabedelo",
+   "tipo": "porto",
+   "municipio": "Cabedelo",
+   "uf": "PB",
+   "lat": -6.9722,
+   "lon": -34.8389,
+   "real": true,
+   "precisao": "instalação (OpenStreetMap)",
+   "rotulo": "Cabedelo"
+  },
+  {
+   "id": "senador-canedo",
+   "nome": "Terminal Transpetro de Senador Canedo",
+   "tipo": "terminal",
+   "municipio": "Senador Canedo",
+   "uf": "GO",
+   "lat": -16.7053,
+   "lon": -49.0874,
+   "real": true,
+   "precisao": "município",
+   "rotulo": "Terminal Senador Canedo"
+  },
+  {
+   "id": "uberlandia-t",
+   "nome": "Terminal de Uberlândia",
+   "tipo": "terminal",
+   "municipio": "Uberlândia",
+   "uf": "MG",
+   "lat": -18.9186,
+   "lon": -48.2772,
+   "real": true,
+   "precisao": "município",
+   "rotulo": "Terminal Uberlândia"
+  },
+  {
+   "id": "porto-nacional",
+   "nome": "Terminal de Porto Nacional",
+   "tipo": "terminal",
+   "uf": "TO",
+   "lat": -10.7061,
+   "lon": -48.4171,
+   "real": true,
+   "municipio": "Porto Nacional",
+   "precisao": "município",
+   "rotulo": "Terminal Porto Nacional"
+  },
+  {
+   "id": "rondonopolis-t",
+   "nome": "Terminal de Rondonópolis",
+   "tipo": "terminal",
+   "uf": "MT",
+   "lat": -16.4673,
+   "lon": -54.6372,
+   "real": true,
+   "municipio": "Rondonópolis",
+   "precisao": "município",
+   "rotulo": "Terminal Rondonópolis"
+  },
+  {
+   "id": "maracanau",
+   "nome": "Terminal de Maracanaú",
+   "tipo": "terminal",
+   "uf": "CE",
+   "lat": -3.8767,
+   "lon": -38.6256,
+   "real": true,
+   "municipio": "Maracanaú",
+   "precisao": "município",
+   "rotulo": "Terminal Maracanaú"
+  },
+  {
+   "id": "base-litoral",
+   "nome": "Base Litoral",
+   "tipo": "base",
+   "municipio": "Camaçari",
+   "uf": "BA",
+   "lat": -12.6996,
+   "lon": -38.3263,
+   "real": false,
+   "capacidade_m3": 13800
+  },
+  {
+   "id": "base-sertao",
+   "nome": "Base Sertão",
+   "tipo": "base",
+   "uf": "BA",
+   "lat": -14.8615,
+   "lon": -40.8442,
+   "real": false,
+   "municipio": "Vitória da Conquista",
+   "capacidade_m3": 3900
+  },
+  {
+   "id": "base-oeste",
+   "nome": "Base Oeste",
+   "tipo": "base",
+   "municipio": "Barreiras",
+   "uf": "BA",
+   "lat": -12.1439,
+   "lon": -44.9968,
+   "real": false,
+   "capacidade_m3": 3600
+  },
+  {
+   "id": "base-vale",
+   "nome": "Base Vale",
+   "tipo": "base",
+   "municipio": "Petrolina",
+   "uf": "PE",
+   "lat": -9.3891,
+   "lon": -40.503,
+   "real": false,
+   "capacidade_m3": 3300
+  },
+  {
+   "id": "base-planalto",
+   "nome": "Base Planalto",
+   "tipo": "base",
+   "municipio": "Anápolis",
+   "uf": "GO",
+   "lat": -16.3281,
+   "lon": -48.9534,
+   "real": false,
+   "capacidade_m3": 6100
+  },
+  {
+   "id": "salvador",
+   "nome": "Salvador",
+   "tipo": "praca",
+   "uf": "BA",
+   "lat": -12.9777,
+   "lon": -38.5016,
+   "real": true
+  },
+  {
+   "id": "feira",
+   "nome": "Feira de Santana",
+   "tipo": "praca",
+   "uf": "BA",
+   "lat": -12.2664,
+   "lon": -38.9663,
+   "real": true
+  },
+  {
+   "id": "itabuna",
+   "nome": "Itabuna",
+   "tipo": "praca",
+   "uf": "BA",
+   "lat": -14.7876,
+   "lon": -39.2781,
+   "real": true
+  },
+  {
+   "id": "guanambi",
+   "nome": "Guanambi",
+   "tipo": "praca",
+   "uf": "BA",
+   "lat": -14.2231,
+   "lon": -42.7799,
+   "real": true
+  },
+  {
+   "id": "bom-jesus-lapa",
+   "nome": "Bom Jesus da Lapa",
+   "tipo": "praca",
+   "uf": "BA",
+   "lat": -13.255,
+   "lon": -43.4181,
+   "real": true
+  },
+  {
+   "id": "juazeiro",
+   "nome": "Juazeiro",
+   "tipo": "praca",
+   "uf": "BA",
+   "lat": -9.4162,
+   "lon": -40.5033,
+   "real": true
+  },
+  {
+   "id": "salgueiro",
+   "nome": "Salgueiro",
+   "tipo": "praca",
+   "uf": "PE",
+   "lat": -8.0742,
+   "lon": -39.1192,
+   "real": true
+  },
+  {
+   "id": "aracaju",
+   "nome": "Aracaju",
+   "tipo": "praca",
+   "uf": "SE",
+   "lat": -10.9472,
+   "lon": -37.0731,
+   "real": true
+  },
+  {
+   "id": "maceio",
+   "nome": "Maceió",
+   "tipo": "praca",
+   "uf": "AL",
+   "lat": -9.6658,
+   "lon": -35.7353,
+   "real": true
+  },
+  {
+   "id": "recife",
+   "nome": "Recife",
+   "tipo": "praca",
+   "uf": "PE",
+   "lat": -8.0476,
+   "lon": -34.877,
+   "real": true
+  },
+  {
+   "id": "caruaru",
+   "nome": "Caruaru",
+   "tipo": "praca",
+   "uf": "PE",
+   "lat": -8.276,
+   "lon": -35.9819,
+   "real": true
+  },
+  {
+   "id": "joao-pessoa",
+   "nome": "João Pessoa",
+   "tipo": "praca",
+   "uf": "PB",
+   "lat": -7.1195,
+   "lon": -34.845,
+   "real": true
+  },
+  {
+   "id": "campina-grande",
+   "nome": "Campina Grande",
+   "tipo": "praca",
+   "uf": "PB",
+   "lat": -7.2307,
+   "lon": -35.8811,
+   "real": true
+  },
+  {
+   "id": "fortaleza",
+   "nome": "Fortaleza",
+   "tipo": "praca",
+   "uf": "CE",
+   "lat": -3.7319,
+   "lon": -38.5267,
+   "real": true
+  },
+  {
+   "id": "sao-luis",
+   "nome": "São Luís",
+   "tipo": "praca",
+   "uf": "MA",
+   "lat": -2.5307,
+   "lon": -44.3068,
+   "real": true
+  },
+  {
+   "id": "imperatriz",
+   "nome": "Imperatriz",
+   "tipo": "praca",
+   "uf": "MA",
+   "lat": -5.5185,
+   "lon": -47.4777,
+   "real": true
+  },
+  {
+   "id": "teresina",
+   "nome": "Teresina",
+   "tipo": "praca",
+   "uf": "PI",
+   "lat": -5.0892,
+   "lon": -42.8019,
+   "real": true
+  },
+  {
+   "id": "palmas",
+   "nome": "Palmas",
+   "tipo": "praca",
+   "uf": "TO",
+   "lat": -10.184,
+   "lon": -48.3336,
+   "real": true
+  },
+  {
+   "id": "brasilia",
+   "nome": "Brasília",
+   "tipo": "praca",
+   "uf": "DF",
+   "lat": -15.7939,
+   "lon": -47.8828,
+   "real": true
+  },
+  {
+   "id": "goiania",
+   "nome": "Goiânia",
+   "tipo": "praca",
+   "uf": "GO",
+   "lat": -16.6869,
+   "lon": -49.2648,
+   "real": true
+  },
+  {
+   "id": "rio-verde",
+   "nome": "Rio Verde",
+   "tipo": "praca",
+   "uf": "GO",
+   "lat": -17.7923,
+   "lon": -50.9192,
+   "real": true
+  },
+  {
+   "id": "patos-de-minas",
+   "nome": "Patos de Minas",
+   "tipo": "praca",
+   "uf": "MG",
+   "lat": -18.5789,
+   "lon": -46.5181,
+   "real": true
+  },
+  {
+   "id": "cuiaba",
+   "nome": "Cuiabá",
+   "tipo": "praca",
+   "uf": "MT",
+   "lat": -15.6014,
+   "lon": -56.0979,
+   "real": true
+  },
+  {
+   "id": "primavera-leste",
+   "nome": "Primavera do Leste",
+   "tipo": "praca",
+   "uf": "MT",
+   "lat": -15.5561,
+   "lon": -54.2811,
+   "real": true
+  }
+ ],
+ "rotas": [
+  {
+   "id": "r01",
+   "de": "mataripe",
+   "para": "base-litoral",
+   "produto": "gasolina_c"
+  },
+  {
+   "id": "r02",
+   "de": "base-litoral",
+   "para": "salvador",
+   "produto": "gasolina_c"
+  },
+  {
+   "id": "r03",
+   "de": "base-litoral",
+   "para": "feira",
+   "produto": "diesel_s10"
+  },
+  {
+   "id": "r04",
+   "de": "base-litoral",
+   "para": "aracaju",
+   "produto": "diesel_s10"
+  },
+  {
+   "id": "r05",
+   "de": "base-litoral",
+   "para": "itabuna",
+   "produto": "etanol"
+  },
+  {
+   "id": "r06",
+   "de": "base-litoral",
+   "para": "base-sertao",
+   "produto": "diesel_s500"
+  },
+  {
+   "id": "r07",
+   "de": "base-sertao",
+   "para": "guanambi",
+   "produto": "diesel_s500"
+  },
+  {
+   "id": "r08",
+   "de": "base-litoral",
+   "para": "base-oeste",
+   "produto": "diesel_s10"
+  },
+  {
+   "id": "r09",
+   "de": "base-oeste",
+   "para": "bom-jesus-lapa",
+   "produto": "diesel_s500"
+  },
+  {
+   "id": "r10",
+   "de": "base-oeste",
+   "para": "palmas",
+   "produto": "gasolina_c"
+  },
+  {
+   "id": "r11",
+   "de": "base-vale",
+   "para": "juazeiro",
+   "produto": "gasolina_c"
+  },
+  {
+   "id": "r12",
+   "de": "base-vale",
+   "para": "salgueiro",
+   "produto": "diesel_s10"
+  },
+  {
+   "id": "r13",
+   "de": "suape",
+   "para": "recife",
+   "produto": "gasolina_c"
+  },
+  {
+   "id": "r14",
+   "de": "suape",
+   "para": "caruaru",
+   "produto": "diesel_s10"
+  },
+  {
+   "id": "r15",
+   "de": "suape",
+   "para": "maceio",
+   "produto": "gasolina_c"
+  },
+  {
+   "id": "r16",
+   "de": "suape",
+   "para": "base-vale",
+   "produto": "gasolina_c"
+  },
+  {
+   "id": "r17",
+   "de": "cabedelo",
+   "para": "joao-pessoa",
+   "produto": "gasolina_c"
+  },
+  {
+   "id": "r18",
+   "de": "cabedelo",
+   "para": "campina-grande",
+   "produto": "diesel_s10"
+  },
+  {
+   "id": "r19",
+   "de": "itaqui",
+   "para": "sao-luis",
+   "produto": "gasolina_c"
+  },
+  {
+   "id": "r20",
+   "de": "itaqui",
+   "para": "imperatriz",
+   "produto": "diesel_s10"
+  },
+  {
+   "id": "r21",
+   "de": "itaqui",
+   "para": "teresina",
+   "produto": "gasolina_c"
+  },
+  {
+   "id": "r22",
+   "de": "maracanau",
+   "para": "fortaleza",
+   "produto": "gasolina_c"
+  },
+  {
+   "id": "r23",
+   "de": "porto-nacional",
+   "para": "palmas",
+   "produto": "etanol"
+  },
+  {
+   "id": "r24",
+   "de": "senador-canedo",
+   "para": "base-planalto",
+   "produto": "diesel_s10"
+  },
+  {
+   "id": "r25",
+   "de": "base-planalto",
+   "para": "brasilia",
+   "produto": "gasolina_c"
+  },
+  {
+   "id": "r26",
+   "de": "base-planalto",
+   "para": "goiania",
+   "produto": "etanol"
+  },
+  {
+   "id": "r27",
+   "de": "senador-canedo",
+   "para": "rio-verde",
+   "produto": "etanol"
+  },
+  {
+   "id": "r28",
+   "de": "uberlandia-t",
+   "para": "patos-de-minas",
+   "produto": "gasolina_c"
+  },
+  {
+   "id": "r29",
+   "de": "rondonopolis-t",
+   "para": "cuiaba",
+   "produto": "etanol"
+  },
+  {
+   "id": "r30",
+   "de": "rondonopolis-t",
+   "para": "primavera-leste",
+   "produto": "diesel_s500"
+  }
+ ],
+ "dutos": [
+  {
+   "id": "osbra",
+   "nome": "Oleoduto OSBRA (Transpetro)",
+   "real": true,
+   "pontos": [
+    "replan",
+    "uberlandia-t",
+    "senador-canedo",
+    "brasilia"
+   ]
+  }
+ ]
+}
