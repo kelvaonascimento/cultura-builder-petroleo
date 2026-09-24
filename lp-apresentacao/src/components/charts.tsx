@@ -1,15 +1,11 @@
 "use client";
 
 import {
-  Area,
-  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
   Cell,
   Legend,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -107,49 +103,3 @@ export function PostosBandeiraChart({ data }: { data: { bandeira: string; postos
     </AnimatedChart>
   );
 }
-
-export function SavingsChart() {
-  const data = [
-    { empresa: "Vibra", ganho: 900, obs: "estoque liberado com IA preditiva (Época Negócios, 2025)" },
-    { empresa: "Petrobras", ganho: 650, obs: "US$ 120 mi em 3 semanas — fiscal + IA (case de fornecedor)" },
-    { empresa: "Braskem", ganho: 460, obs: "por ano — estimativa própria declarada (2024)" },
-    { empresa: "Raízen", ganho: 230, obs: "transportes, desde 2021 (Estadão, 2024)" },
-  ];
-  return (
-    <AnimatedChart height={280}>
-      <ResponsiveContainer width="100%" height={280}>
-        <BarChart data={data} layout="vertical" margin={{ top: 10, right: 24, bottom: 0, left: 8 }}>
-          <CartesianGrid stroke={GRAYS.line} strokeDasharray="3 3" horizontal={false} />
-          <XAxis
-            type="number"
-            tick={{ fill: GRAYS.mid, fontSize: 12 }}
-            axisLine={{ stroke: GRAYS.faint }}
-            tickLine={false}
-            tickFormatter={(v: number) => `R$ ${v} mi`}
-          />
-          <YAxis
-            type="category"
-            dataKey="empresa"
-            width={90}
-            tick={{ fill: GRAYS.ink, fontSize: 12, fontWeight: 600 }}
-            axisLine={false}
-            tickLine={false}
-          />
-          <Tooltip
-            contentStyle={tooltipStyle}
-            formatter={(v, _n, p) => {
-              const obs = (p?.payload as { obs?: string })?.obs ?? "";
-              return [`R$ ${Number(v).toLocaleString("pt-BR")} mi — ${obs}`, "Ganho documentado"];
-            }}
-          />
-          <Bar dataKey="ganho" barSize={28} radius={[0, 6, 6, 0]} animationDuration={1200} animationEasing="ease-out">
-            {data.map((entry, i) => (
-              <Cell key={entry.empresa} fill={[GRAYS.ink, GRAYS.dark, GRAYS.mid, GRAYS.light][i]} />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
-    </AnimatedChart>
-  );
-}
-

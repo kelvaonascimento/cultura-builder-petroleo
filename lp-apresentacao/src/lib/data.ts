@@ -38,96 +38,32 @@ export const fontesPrimarias: { label: string; url: string }[] = [
   { label: "OpenStreetMap / OSRM — rotas rodoviárias", url: "https://www.openstreetmap.org/copyright" },
 ];
 
-export const concorrenciaIa: {
-  player: string;
-  origem: "brasil" | "global";
-  maturidade: string;
-  ondeAposta: string;
-  ganho: string;
-}[] = [
+// Casos de IA no setor: só entram com fonte identificada (veículo/canal oficial e data).
+// Casos que circulam sem fonte primária (inclusive globais) ficaram de fora até serem confirmados.
+export const casosIa: { empresa: string; oQueFez: string; resultado: string; fonte: Ref }[] = [
   {
-    player: "Petrobras",
-    origem: "brasil",
-    maturidade: "Líder nacional",
-    ondeAposta: "Fiscal + IA generativa (Automation Anywhere), ML financeiro, ChatPetrobras (Azure OpenAI), manutenção preditiva, reservatórios, corrosão, recuperação de bens de devedores",
-    ganho: "US$ 120 mi em 3 semanas; +51% de precisão em previsão de receita (~R$ 400 mi de erro evitado); >US$ 1 bi projetado",
+    empresa: "Vibra",
+    oQueFez: "IA na logística para prever demanda e dimensionar estoques.",
+    resultado: "R$ 900 milhões a menos parados em estoque.",
+    fonte: { rotulo: "VEJA, 05/08/2026", url: "https://news.google.com/search?q=IA%20libera%20R%24%20900%20milh%C3%B5es%20que%20a%20Vibra%20mantinha%20em%20estoques&hl=pt-BR" },
   },
   {
-    player: "Vibra",
-    origem: "brasil",
-    maturidade: "Líder nacional em IA transversal",
-    ondeAposta: "IA preditiva de estoque; Premia (20 mi+ fidelizados); InterSystems IRIS; IA + câmeras no posto; IA logística (prevê consumo com meses de antecedência); IA B2B",
-    ganho: "R$ 900 mi reduzidos em estoque; precisão de demanda 98%; -67% acidentes na frota; lucro R$ 6,4 bi (2024, +33,6%); declarado oficialmente no Relato Integrado 2024 (GRI)",
+    empresa: "Raízen",
+    oQueFez: "IA para otimizar operações, com foco em transporte.",
+    resultado: "Redução de custos de R$ 230 milhões.",
+    fonte: { rotulo: "Estadão, 08/04/2024", url: "https://news.google.com/search?q=Ra%C3%ADzen%20reduz%20custos%20em%20R%24%20230%20milh%C3%B5es%20intelig%C3%AAncia%20artificial&hl=pt-BR" },
   },
   {
-    player: "Raízen",
-    origem: "brasil",
-    maturidade: "Avançado (hub Pulse desde 2017)",
-    ondeAposta: "Otimização de transporte de combustíveis com IA, IA no agronegócio, biogás",
-    ganho: "R$ 230 mi de economia desde 2021 em transportes; mas em recuperação extrajudicial",
+    empresa: "Petrobras",
+    oQueFez: "ChatPetrobras: ferramenta de IA generativa para uso interno.",
+    resultado: "Disponível para mais de 100 mil trabalhadores.",
+    fonte: { rotulo: "Agência Petrobras, 05/12/2023", url: "https://news.google.com/search?q=Petrobras%20cria%20ferramenta%20com%20Intelig%C3%AAncia%20Artificial%20Generativa%20para%20apoiar%20mais%20de%20100%20mil%20trabalhadores&hl=pt-BR" },
   },
   {
-    player: "Braskem",
-    origem: "brasil",
-    maturidade: "Avançado (petroquímica)",
-    ondeAposta: "Control Tower (visibilidade end-to-end, modelagem de cenários com IA + Big Data); IA transversal em 40 unidades",
-    ganho: "R$ 460 mi/ano estimados; EBITDA 2025 +26,2%",
-  },
-  {
-    player: "Acelen",
-    origem: "brasil",
-    maturidade: "Investindo pesado",
-    ondeAposta: "Modernização de Mataripe; top-3 da América Latina em eficiência de refino",
-    ganho: "Capacidade de diesel +10%",
-  },
-  {
-    player: "ALE",
-    origem: "brasil",
-    maturidade: "Não mapeado publicamente",
-    ondeAposta: "Crescimento via bandeira, conveniência, frota própria",
-    ganho: "—",
-  },
-  {
-    player: "Distribuidoras regionais (Larco, Setta, Dislub, ALE…)",
-    origem: "brasil",
-    maturidade: "Baixa — Excel, telefone, WhatsApp (inferência de mercado, não censo auditado)",
-    ondeAposta: "Nada estruturado em IA",
-    ganho: "GAP DE MERCADO — a oportunidade",
-  },
-  {
-    player: "Shell",
-    origem: "global",
-    maturidade: "Líder global",
-    ondeAposta: "Manutenção preditiva com C3 AI (10.000 equipamentos), trading, digitalização",
-    ganho: "US$ 2 bi/ano; -40% falhas; -35% paradas não programadas; -20% custo de manutenção",
-  },
-  {
-    player: "BP",
-    origem: "global",
-    maturidade: "Líder global",
-    ondeAposta: "Digital twin (Palantir, 5 anos), interpretação sísmica, Open Energi, transição energética",
-    ganho: "+4% produção; -10% paradas evitadas; -90% tempo de interpretação sísmica; US$ 10 mi (energia); meta -US$ 2 bi em custos",
-  },
-  {
-    player: "ExxonMobil",
-    origem: "global",
-    maturidade: "Líder global",
-    ondeAposta: "Trading inteligente, otimização de refino, simulação",
-    ganho: "US$ 9,7 bi de economia estrutural → meta US$ 15 bi (2027)",
-  },
-  {
-    player: "Chevron",
-    origem: "global",
-    maturidade: "Avançado",
-    ondeAposta: "Parceria Microsoft, Permian, análise preditiva de segurança",
-    ganho: "12 acidentes maiores evitados; US$ 12 mi no 1º ano",
-  },
-  {
-    player: "TotalEnergies",
-    origem: "global",
-    maturidade: "Avançado",
-    ondeAposta: "Monitoramento de emissões, IA transversal",
-    ganho: "-47% emissões de metano",
+    empresa: "Petrobras",
+    oQueFez: "Machine learning para prever receitas.",
+    resultado: "Ampliação do uso de IA em finanças e planejamento.",
+    fonte: { rotulo: "Agência eixos, 07/11/2024", url: "https://news.google.com/search?q=Petrobras%20amplia%20uso%20da%20tecnologia%20e%20prev%C3%AA%20receitas%20com%20machine%20learning&hl=pt-BR" },
   },
 ];
 
@@ -162,55 +98,29 @@ export const dores: Record<"tributario" | "financeiro" | "operacao" | "regulacao
 export type Melhoria = { area: string; aplicacao: string; ganho: string };
 
 export const matrizMelhorias: Record<string, Melhoria[]> = {
-  "Exploração & Produção (upstream)": [
-    { area: "Interpretação sísmica", aplicacao: "IA de visão computacional sobre dados sísmicos", ganho: "BP: -90% do tempo de interpretação; melhor performance exploratória em anos" },
-    { area: "Reservatórios", aplicacao: "ML para seleção e gestão de reservatórios", ganho: "Petrobras usa IA em reservatórios; BP: +4% de produção" },
-    { area: "Perfuração", aplicacao: "Perfuração automatizada guiada por IA", ganho: "Menos horas de sonda, menos acidentes (referência: Exxon, Noble)" },
-    { area: "Manutenção de plataformas", aplicacao: "Sensores + manutenção preditiva", ganho: "Shell: US$ 2 bi/ano; -40% falhas" },
-    { area: "Segurança operacional", aplicacao: "Análise preditiva de acidentes", ganho: "Chevron: 12 acidentes maiores evitados; US$ 12 mi" },
-    { area: "Emissões/ESG", aplicacao: "Monitoramento contínuo com IA", ganho: "TotalEnergies: -47% metano" },
+  "Exploração & Produção": [
+    { area: "Manutenção de plataformas", aplicacao: "Sensores + manutenção preditiva", ganho: "Menos paradas não programadas; manutenção pela condição do equipamento" },
+    { area: "Interpretação de dados técnicos", aplicacao: "IA sobre sísmica, poços e relatórios", ganho: "Menos horas de especialista por análise" },
+    { area: "Segurança operacional", aplicacao: "Análise preditiva de incidentes", ganho: "Risco identificado antes do acidente" },
   ],
-  "Logística & Transporte (midstream)": [
-    { area: "Roteirização de cargas", aplicacao: "Otimização de rotas e inventário com IA", ganho: "-24% de custo; -50% de erros no segmento de distribuição (benchmark secundário de mercado)" },
-    { area: "Pilflagem/antifurto", aplicacao: "Sensores + IA para detecção em dutos e tanques", ganho: "Redução de bilhões em perdas do crime organizado" },
-    { area: "Gestão de dutos", aplicacao: "Digital twin de dutos e terminais", ganho: "Prevenção de vazamentos; otimização de vazão" },
-    { area: "Frota", aplicacao: "Telemetria + manutenção preditiva", ganho: "Menos quebras e multas; vida útil maior" },
+  "Suprimento & Logística": [
+    { area: "Estoque por base", aplicacao: "Previsão de demanda por produto e praça", ganho: "Menos capital parado em estoque — caso Vibra (VEJA, 05/08/2026)" },
+    { area: "Roteirização", aplicacao: "Otimização de rotas, cargas e janelas", ganho: "Menos km vazio e menos custo de frete — caso Raízen (Estadão, 08/04/2024)" },
+    { area: "Custo de reposição", aplicacao: "Recalcular custo a cada reajuste, subvenção ou tributo", ganho: "Preço por praça atualizado no mesmo dia" },
   ],
-  "Refino": [
-    { area: "Otimização de processo", aplicacao: "IA para simulação e otimização de reações/energia", ganho: "ExxonMobil: US$ 9,7 bi estruturais → US$ 15 bi (2027)" },
-    { area: "Planejamento de produção", aplicacao: "Otimização de campanhas e misturas", ganho: "Acelen: top-3 da AL em eficiência de refino com modernização digital" },
-    { area: "Qualidade em linha", aplicacao: "Visão computacional + espectroscopia", ganho: "Menos retrabalho e refugo" },
+  "Comercial & Preço": [
+    { area: "Margem por praça", aplicacao: "Preço por produto × praça × concorrência, com piso de margem", ganho: "Margem defendida e trilha de custos para a régua da ANP" },
+    { area: "Portal B2B", aplicacao: "Cotação, pedido e crédito digitais", ganho: "Resposta ao revendedor em minutos, não em dias" },
+    { area: "Previsão de receita", aplicacao: "Machine learning sobre séries de vendas", ganho: "Planejamento financeiro com menos erro — caso Petrobras (Agência eixos, 07/11/2024)" },
   ],
-  "Comercial & Trading": [
-    { area: "Previsão de receita/demanda", aplicacao: "ML sobre séries temporais", ganho: "Petrobras: +51% de precisão; ~R$ 400 mi de erro evitado (base R$ 9 bi/semana)" },
-    { area: "Precificação dinâmica", aplicacao: "Preço por produto × região × concorrência", ganho: "Margem líquida: +0,5% a 1,5% em distribuidoras (estimativa — modelagem própria)" },
-    { area: "Hedging/trading", aplicacao: "Otimização de carteira com IA", ganho: "ExxonMobil: gains estruturais no trading" },
+  "Fiscal & Regulação": [
+    { area: "NF-e e tributos", aplicacao: "Conferência automática de ICMS ad rem, PIS/Cofins e subvenção", ganho: "Erro pego antes da emissão, não na fiscalização" },
+    { area: "Reforma tributária", aplicacao: "Simulação de CBS/IBS por praça (2027–2033)", ganho: "Preço e contrato prontos para a transição" },
+    { area: "RenovaBio e ANP", aplicacao: "Controle de meta de CBIO, mistura e prazos", ganho: "Prazos cumpridos sem planilha paralela" },
   ],
-  "Distribuição & Revenda": [
-    { area: "Portal B2B", aplicacao: "Cotação, pedido e crédito digital (Next.js + Postgres)", ganho: "Funil de captação 3-5x mais barato que telefone (modelagem própria); ciclo de venda menor" },
-    { area: "Crédito de revenda", aplicacao: "Scoring com dados cadastrais + histórico", ganho: "Menos inadimplência; crédito pré-aprovado formalizado" },
-    { area: "Prospecção de postos", aplicacao: "Agente de IA para listas e abordagens", ganho: "49,4% dos 10.332 postos do NE são bandeira branca — mercado gigante" },
-    { area: "Gestão de rede", aplicacao: "Dashboard de volumes, contratos e margem por posto", ganho: "Decisão em tempo real vs. relatório mensal" },
-  ],
-  "Varejo (postos)": [
-    { area: "Precificação no bico", aplicacao: "Reprecificação automática por concorrência local", ganho: "Margem do posto: recuperação de 0,5-2 p.p." },
-    { area: "Antifraude", aplicacao: "Análise de padrões de venda x estoque", ganho: "Combate a adulteração e bomba-truque" },
-    { area: "Conveniência", aplicacao: "Mix e precificação com IA", ganho: "Conveniência responde por parte relevante da margem do posto" },
-  ],
-  "Fiscal & Back-office": [
-    { area: "Apuração multi-estado", aplicacao: "Automação + IA generativa para ICMS/PIS/Cofins", ganho: "Petrobras: US$ 120 mi em 3 semanas; impostos em 3 dias (1ª vez em 15 anos); +40% eficiência" },
-    { area: "Reforma tributária (IBS/CBS)", aplicacao: "Pipelines de transição 2026+", ganho: "Toda distribuidora precisará reescrever a esteira fiscal — quem automatizar primeiro ganha" },
-    { area: "Contas a pagar/receber", aplicacao: "IA para conciliação e cobrança", ganho: "Redução de inadimplência e custo administrativo" },
-    { area: "Copilotos internos", aplicacao: "RAG sobre legislação e documentos", ganho: "ChatPetrobras: 100 mil+ funcionários; resposta com citação de fonte" },
-  ],
-  "Compliance & HSE": [
-    { area: "Antifraude/crédito", aplicacao: "Padrões OWASP, trilha de auditoria, análise de risco", ganho: "Redução de exposição regulatória (histórico Lava Jato)" },
-    { area: "Monitoramento ambiental", aplicacao: "IA em imagens de satélite e sensores", ganho: "TotalEnergies: -47% metano; multas evitadas" },
-    { area: "Segurança de dados", aplicacao: "Hardening, monitoramento, resposta a incidentes", ganho: "Ransomware no setor é ameaça real e carreira-ending" },
-  ],
-  "Pessoas & Cultura": [
-    { area: "Produtividade", aplicacao: "Copilotos para comercial, fiscal e operações", ganho: "+40% de eficiência em processos (benchmark)" },
-    { area: "Atração de talento", aplicacao: "Automação de recrutamento e conteúdo", ganho: "Setor compete com tech por dados e IA" },
+  "Pessoas & Back-office": [
+    { area: "Copilotos internos", aplicacao: "IA generativa sobre normas e documentos internos", ganho: "Resposta com a fonte citada — caso ChatPetrobras (Agência Petrobras, 05/12/2023)" },
+    { area: "Cobrança e crédito", aplicacao: "Score de risco e régua de cobrança", ganho: "Menos inadimplência e limite aprovado mais rápido" },
   ],
 };
 
