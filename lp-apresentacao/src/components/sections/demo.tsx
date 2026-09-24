@@ -23,9 +23,9 @@ export function Demo() {
       <div className="mt-3">
         <FaixaMercado />
       </div>
-      <div className="mt-3 grid gap-3 lg:grid-cols-[200px_1fr]">
+      <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-[200px_minmax(0,1fr)]">
         <Lateral view={view} onNav={setView} />
-        <div className="min-h-[560px]">
+        <div className="min-h-[560px] min-w-0">
           <View sim={sim} tema={tema} onNav={setView} />
         </div>
       </div>
@@ -73,7 +73,7 @@ function Topo({ sim, tema, setTema, tela }: { sim: SimData; tema: Tema; setTema:
           <span key={c} className="rounded-full border border-border px-2 py-0.5 text-[9.5px] text-muted-foreground">{c}</span>
         ))}
       </div>
-      <div className="ml-auto flex items-center gap-3">
+      <div className="ml-auto flex flex-wrap items-center justify-end gap-2 sm:gap-3">
         <Copiloto painel={painel} />
         <span className="text-[11px] tabular-nums text-muted-foreground">{sim.hora}</span>
         <Segmented

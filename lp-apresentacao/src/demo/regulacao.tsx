@@ -68,7 +68,7 @@ export function RegulacaoView({ sim }: { sim: { modo: Modo; hora: string } }) {
         <Tile rotulo="Prazos em 100 dias" valor={String(PRAZOS.length)} nota={`próximo: ${PRAZOS[0].data}`} />
       </div>
 
-      <div className="grid gap-3 xl:grid-cols-12">
+      <div className="grid grid-cols-1 gap-3 xl:grid-cols-12">
         <section className="rounded-2xl bg-card p-4 ring-1 ring-foreground/[0.07] xl:col-span-7">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <div>

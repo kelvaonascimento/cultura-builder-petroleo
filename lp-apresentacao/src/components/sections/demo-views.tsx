@@ -194,7 +194,7 @@ export function VisaoGeral({ sim, tema, onNav }: ViewProps) {
         <Stat label="Alertas abertos" value={String(sim.alertas)} nota={sim.modo === "integrada" ? "tratados por agentes" : "fila humana de triagem"} />
       </div>
 
-      <div className="grid gap-3 xl:grid-cols-12">
+      <div className="grid grid-cols-1 gap-3 xl:grid-cols-12">
         <PanelCard
           className="xl:col-span-5"
           title="Briefing das 08:00 · Diretoria"
@@ -235,7 +235,7 @@ export function VisaoGeral({ sim, tema, onNav }: ViewProps) {
         </PanelCard>
       </div>
 
-      <div className="grid gap-3 xl:grid-cols-12">
+      <div className="grid grid-cols-1 gap-3 xl:grid-cols-12">
         <PanelCard className="xl:col-span-7" title="A fila de pedidos atravessa 8 sistemas sem toque humano" sub="No modo manual, cada etapa depende de alguém digitar, ligar ou conferir.">
           <FunilSistemas sim={sim} />
         </PanelCard>
@@ -333,7 +333,7 @@ export function ComercialView({ sim }: ViewProps) {
         <Stat label={sim.modo === "integrada" ? "Capturado por agentes" : "Ficando na mesa"} value={sim.modo === "integrada" ? fmtRs(sim.capturado) : fmtRs(sim.naMesa)} nota={sim.modo === "integrada" ? "oportunidades não perdidas" : "sem follow-up registrado"} />
       </div>
 
-      <div className="grid gap-3 xl:grid-cols-12">
+      <div className="grid grid-cols-1 gap-3 xl:grid-cols-12">
         <PanelCard
           className="xl:col-span-8"
           title="Fila de pedidos atravessando os 8 sistemas"
@@ -534,7 +534,7 @@ export function RedeView({ sim, tema, onNav }: ViewProps) {
         <Stat label="Captação em aberto" value={sim.modo === "integrada" ? "9 leads" : "23 leads parados"} nota="bandeira branca no interior" />
       </div>
 
-      <div className="grid gap-3 xl:grid-cols-12">
+      <div className="grid grid-cols-1 gap-3 xl:grid-cols-12">
         <PanelCard className="xl:col-span-7" title="Demanda por posto (litros/dia, mil)" sub="Top da rede · janela de 14 dias">
           <div className="h-44">
             <ResponsiveContainer width="100%" height="100%">
@@ -554,7 +554,7 @@ export function RedeView({ sim, tema, onNav }: ViewProps) {
             {[
               { t: "Padrão de bomba-truque", d: "Câmeras cruzaram picos de bico sem passagem de veículo. OS aberta automática." },
               { t: "Lavração suspeita", d: "Divergência compra×venda×tanque por 3 ciclos consecutivos. Auditoria aberta." },
-              { t: "Concorrência no raio", d: "Novo posto aberto a 2,1 km de Rede Xavier. Copiloto reposicionou preço." },
+              { t: "Concorrência no raio", d: "Novo posto aberto a 2,1 km de Rede Cliente 318. Copiloto reposicionou preço." },
             ].map((x) => (
               <div key={x.t} className="rounded-xl bg-secondary px-3 py-2.5">
                 <p className="text-[11.5px] font-semibold text-foreground">{x.t}</p>
@@ -607,7 +607,7 @@ export function RedeView({ sim, tema, onNav }: ViewProps) {
       <PanelCard title="Captação de bandeira branca" sub="Agente de prospecção mapeia postos independentes no NE e prepara a abordagem">
         <div className="grid gap-2 sm:grid-cols-3">
           {[
-            { c: "Irecê · BA", n: "Auto Posto Sertão", s: "lead qualificado", v: "secondary" },
+            { c: "Irecê · BA", n: "Posto Cliente 829", s: "lead qualificado", v: "secondary" },
             { c: "Luís E. Magalhães · BA", n: "3 postos na BR-242", s: "abordagem enviada", v: "secondary" },
             { c: "Barreiras · BA", n: "Rede oeste (12 postos)", s: "aguardando visita", v: "outline" },
           ].map((x) => (
@@ -638,7 +638,7 @@ export function SuprimentoView({ sim, tema }: ViewProps) {
         <Stat label="Compras em aberto" value="3 POs" nota="confirmadas com refinaria/trading" />
       </div>
 
-      <div className="grid gap-3 xl:grid-cols-12">
+      <div className="grid grid-cols-1 gap-3 xl:grid-cols-12">
         <PanelCard className="xl:col-span-6" title="Tanques por base" sub="Nível e dias de cobertura — simulação">
           <div className="space-y-3">
             {sim.tanques.map((t) => (
@@ -740,7 +740,7 @@ export function LogisticaView({ sim, tema }: ViewProps) {
 
       <MapaOperacao tema={tema} altura={540} onEmRota={setEmRota} />
 
-      <div className="grid gap-3 xl:grid-cols-12">
+      <div className="grid grid-cols-1 gap-3 xl:grid-cols-12">
         <PanelCard className="xl:col-span-7" title="Km vazio (14 dias)" sub="Cargas agrupadas pelo agente de rota (simulado)">
           <div className="h-40">
             <ResponsiveContainer width="100%" height="100%">
@@ -812,7 +812,7 @@ export function FinanceiroView({ sim, tema }: ViewProps) {
         <Stat label="Margem bruta" value={fmtRs(+margemRsM3(sim.precos).toFixed(2)) + "/m³"} nota={sim.modo === "integrada" ? "copiloto no controle" : "caindo com preço do vizinho"} />
       </div>
 
-      <div className="grid gap-3 xl:grid-cols-12">
+      <div className="grid grid-cols-1 gap-3 xl:grid-cols-12">
         <PanelCard className="xl:col-span-7" title="Fluxo de caixa diário" sub="Entradas × saídas — R$ milhões (simulação)">
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
@@ -885,7 +885,7 @@ export function FiscalView({ sim, tema }: ViewProps) {
         <Stat label="Relatórios ANP" value="0 em atraso" nota="consolidado diário automático" />
       </div>
 
-      <div className="grid gap-3 xl:grid-cols-12">
+      <div className="grid grid-cols-1 gap-3 xl:grid-cols-12">
         <PanelCard className="xl:col-span-4" title="RenovaBio · CBIOs" sub="Obrigação estimada vs. emitido no período (simulação)">
           <div className="flex items-center justify-center gap-5">
             <svg viewBox="0 0 130 130" className="h-32 w-32">
@@ -995,7 +995,7 @@ export function CentroIAView({ sim, tema }: ViewProps) {
         </div>
       </PanelCard>
 
-      <div className="grid gap-3 xl:grid-cols-12">
+      <div className="grid grid-cols-1 gap-3 xl:grid-cols-12">
         <PanelCard className="xl:col-span-7" title="Dados que estavam dormindo" sub="A IA só entrega quando os dados da operação viram contexto — não relatório.">
           <div className="space-y-1.5">
             {[
@@ -1047,7 +1047,7 @@ export function SegurancaView({ sim }: ViewProps) {
         <Stat label="Residência de dados" value="Brasil" nota="LGPD por padrão" />
       </div>
 
-      <div className="grid gap-3 xl:grid-cols-12">
+      <div className="grid grid-cols-1 gap-3 xl:grid-cols-12">
         <PanelCard className="xl:col-span-6" title="Incidentes e fraudes" sub="Câmeras + telemetria + conciliação de tanque viram contexto dos agentes de compliance">
           <div className="space-y-1.5">
             {sim.incidentes.map((i) => (
@@ -1062,7 +1062,7 @@ export function SegurancaView({ sim }: ViewProps) {
             ))}
           </div>
           <div className="mt-3 rounded-lg bg-secondary px-3 py-2.5 text-[11px] leading-snug text-muted-foreground">
-            <span className="font-semibold text-foreground">Por que importa:</span> fraude em distribuidoras pequenas e médias costuma aparecer no fechamento mensal — semanas depois. Aqui, o padrão de lavração e bomba-truque aparece em minutos, com OS aberta e trilha para auditoria.
+            <span className="font-semibold text-foreground">Por que importa:</span> fraude em distribuidoras pequenas e médias costuma aparecer no fechamento mensal — semanas depois. Aqui, divergência de medição e bomba adulterada aparecem em minutos, com OS aberta e trilha para auditoria.
           </div>
         </PanelCard>
 

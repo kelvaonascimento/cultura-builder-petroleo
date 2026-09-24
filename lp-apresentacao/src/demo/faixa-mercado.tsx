@@ -38,7 +38,7 @@ export function FaixaMercado() {
               target="_blank"
               rel="noreferrer"
               title={`${i.fonte} · ${i.data}${i.modo === "ao vivo" ? " · atualizado automaticamente" : " · valor publicado na data indicada"}`}
-              className="group min-w-[188px] snap-start rounded-xl bg-secondary px-3 py-2 transition-colors hover:bg-secondary/70"
+              className="group min-w-[208px] snap-start rounded-xl bg-secondary px-3 py-2 transition-colors hover:bg-secondary/70"
             >
               <p className="flex items-center gap-1 whitespace-nowrap text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                 {i.rotulo}
@@ -61,7 +61,7 @@ export function FaixaMercado() {
               </p>
             </a>
           ) : (
-            <div key={k} className="h-[86px] min-w-[188px] animate-pulse rounded-xl bg-secondary" />
+            <div key={k} className="h-[86px] min-w-[208px] animate-pulse rounded-xl bg-secondary" />
           ),
         )}
       </div>

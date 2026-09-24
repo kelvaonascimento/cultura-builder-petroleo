@@ -15,7 +15,15 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Raio-X do setor: Petróleo & Combustíveis no Brasil — Cultura Builder",
   description:
-    "Apresentação interna com pesquisa densa do setor: ranking das maiores, faturamentos, quem usa IA e ganhos documentados, dores, matriz de melhorias e demonstrações.",
+    "Mercado, regulação e IA no setor de combustíveis com dados públicos e verificáveis (ANP, CVM, Planalto) — e a demonstração de um painel operacional com agentes de IA.",
+  // apresentação comercial com análise de mercado: fora dos buscadores
+  robots: { index: false, follow: false },
+  openGraph: {
+    title: "Raio-X do setor de petróleo e combustíveis",
+    description: "Dados públicos e verificáveis + demonstração de um painel operacional com IA — Cultura Builder",
+    locale: "pt_BR",
+    type: "website",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

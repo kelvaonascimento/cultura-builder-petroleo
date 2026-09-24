@@ -56,10 +56,17 @@ const orderedKeys = [
   "potencial",
 ];
 
+// compara palavras inteiras e sem acento ("Raízen" → raizen; "TotalEnergies" não casa com "ale")
 export function logoFor(name: string): LogoEntry | null {
-  const n = name.toLowerCase();
+  const palavras = name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+  const junto = palavras.join("");
   for (const key of orderedKeys) {
-    if (n.includes(key)) return registry[key];
+    if (palavras.includes(key) || junto.startsWith(key)) return registry[key];
   }
   return null;
 }

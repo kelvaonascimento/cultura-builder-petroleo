@@ -1,4 +1,4 @@
-import { dores } from "@/lib/data";
+import { dores, type Item } from "@/lib/data";
 import { Reveal } from "@/components/motion";
 
 const Card = ({
@@ -7,7 +7,7 @@ const Card = ({
   className = "",
 }: {
   titulo: string;
-  itens: string[];
+  itens: Item[];
   className?: string;
 }) => (
   <div
@@ -16,9 +16,14 @@ const Card = ({
     <p className="text-base font-semibold text-[#1d1d1f]">{titulo}</p>
     <ul className="mt-5 space-y-3.5">
       {itens.map((item) => (
-        <li key={item} className="flex gap-3 text-sm leading-relaxed text-[#6e6e73]">
+        <li key={item.texto} className="flex gap-3 text-sm leading-relaxed text-[#6e6e73]">
           <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#d2d2d7]" />
-          {item}
+          <span>
+            {item.texto}{" "}
+            <a href={item.fonte.url} target="_blank" rel="noreferrer" className="whitespace-nowrap text-[11px] text-[#86868b] underline-offset-2 hover:underline">
+              {item.fonte.rotulo} ↗
+            </a>
+          </span>
         </li>
       ))}
     </ul>
@@ -35,13 +40,13 @@ export function Dores() {
             Onde o setor sangra.
           </h2>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[#6e6e73]">
-            Cada dor é uma porta de entrada comercial. O tributário é a maior de todas — e a
-            reforma de 2026 vai obrigar todo mundo a reescrever a esteira.
+            Cada dor é uma porta de entrada — e todas estão em documento oficial. Tributo, subvenção e mistura mudam por
+            ato do governo; a margem de cada praça está sob a régua da ANP.
           </p>
         </Reveal>
 
         <div className="mt-14 grid grid-cols-1 gap-4 md:grid-cols-3">
-          <Card titulo="Tributário — a dor nº 1" itens={dores.tributario} className="md:col-span-2" />
+          <Card titulo="Tributário" itens={dores.tributario} className="md:col-span-2" />
           <Card titulo="Financeiro" itens={dores.financeiro} />
           <Card titulo="Operação e logística" itens={dores.operacao} />
           <Card titulo="Regulação e compliance" itens={dores.regulacao} />

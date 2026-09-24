@@ -1,208 +1,78 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Reveal } from "@/components/motion";
 import { CompanyLogo } from "@/components/logo";
-import { AnimatedNumber, Reveal } from "@/components/motion";
-import { mapaEmpresas46, cadeiaResumo, whiteSpace, fatosNovos } from "@/lib/data";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { cadeiaResumo, whiteSpace, fatosNovos } from "@/lib/data";
+import { EMPRESAS_LISTADAS, FONTE_CVM } from "@/lib/dados-oficiais";
 
-type Filter = "todas" | "com-ia" | "sem-ia";
-
-const filters: { value: Filter; label: string }[] = [
-  { value: "todas", label: "Todas" },
-  { value: "com-ia", label: "Com IA documentada" },
-  { value: "sem-ia", label: "Sem IA documentada" },
-];
-
-function iaBucket(ia: string): "com" | "sem" | "outras" {
-  if (ia.startsWith("NÃO")) return "sem";
-  if (ia.startsWith("SIM") || ia.startsWith("Parcial")) return "com";
-  return "outras";
-}
-
-function EmpresaTable({ rows }: { rows: typeof mapaEmpresas46 }) {
-  return (
-    <Table>
-      <TableHeader>
-        <TableRow className="border-white">
-          <TableHead className="w-12 text-[#6e6e73]">#</TableHead>
-          <TableHead className="text-[#6e6e73]">Empresa</TableHead>
-          <TableHead className="text-[#6e6e73]">Sede</TableHead>
-          <TableHead className="text-[#6e6e73]">Receita 2023</TableHead>
-          <TableHead className="text-[#6e6e73]">Uso de IA</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {rows.map((e) => (
-          <TableRow
-            key={e.n}
-            className="border-white transition-colors hover:bg-white"
-          >
-            <TableCell className="text-[#86868b]">{e.n}</TableCell>
-            <TableCell className="whitespace-nowrap font-medium text-[#1d1d1f]">
-              <span className="flex items-center gap-2.5">
-                <CompanyLogo name={e.empresa} size={20} />
-                {e.empresa}
-              </span>
-            </TableCell>
-            <TableCell className="text-[#6e6e73]">{e.sede}</TableCell>
-            <TableCell className="whitespace-nowrap text-[#6e6e73]">{e.receita}</TableCell>
-            <TableCell
-              className={
-                e.ia.startsWith("NÃO")
-                  ? "text-[#86868b]"
-                  : "font-medium text-[#1d1d1f]"
-              }
-            >
-              {e.ia}
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  );
-}
+const reais = (v: number) => "R$ " + v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const pct = (v: number) => (v > 0 ? "+" : "") + v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "%";
 
 export function Empresas() {
-  const [filter, setFilter] = useState<Filter>("todas");
-  const semIa = useMemo(
-    () => mapaEmpresas46.filter((e) => e.ia.startsWith("NÃO")).length,
-    [],
-  );
-  const rows = useMemo(() => {
-    if (filter === "todas") return mapaEmpresas46;
-    if (filter === "com-ia")
-      return mapaEmpresas46.filter((e) => iaBucket(e.ia) === "com");
-    return mapaEmpresas46.filter(
-      (e) => iaBucket(e.ia) === "sem" || iaBucket(e.ia) === "outras",
-    );
-  }, [filter]);
-
   return (
     <section id="empresas" className="bg-white py-24 md:py-32">
       <div className="mx-auto max-w-6xl px-6">
         <Reveal>
-          <p className="text-sm font-medium text-[#6e6e73]">Mapa de empresas</p>
-          <h2 className="mt-3 text-4xl font-semibold tracking-tight text-[#1d1d1f] md:text-6xl">
-            As 46 maiores de O&amp;G, uma por uma.
-          </h2>
+          <p className="text-sm font-medium text-[#6e6e73]">Empresas e fatos de mercado</p>
+          <h2 className="mt-3 text-4xl font-semibold tracking-tight text-[#1d1d1f] md:text-6xl">O que mudou no último ano.</h2>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[#6e6e73]">
-            Censo completo do Valor 1000: receita líquida de 2023, sede e maturidade de IA de
-            cada empresa. Total do setor: ~R$ 1,45 trilhão. Das 46, {semIa} não têm qualquer
-            uso de IA documentado.
+            Receita das maiores empresas listadas do setor, direto das demonstrações entregues à CVM, e os fatos que mexeram
+            no mercado — cada um com o link da fonte.
           </p>
         </Reveal>
 
-        <div className="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            {
-              value: 46,
-              prefix: "",
-              suffix: "",
-              decimals: 0,
-              label: "empresas de O&G entre as 1.000 maiores do Brasil",
-            },
-            {
-              value: 90,
-              prefix: "> ",
-              suffix: "%",
-              decimals: 0,
-              label: "da receita do setor está nas 11 primeiras",
-            },
-            {
-              value: semIa,
-              prefix: "",
-              suffix: "/46",
-              decimals: 0,
-              label: "sem uso de IA documentado — o white space",
-            },
-            {
-              value: 1.45,
-              prefix: "R$ ",
-              suffix: " tri",
-              decimals: 2,
-              label: "receita líquida somada do setor",
-            },
-          ].map((s, i) => (
-            <Reveal key={s.label} delay={i * 90}>
-              <div className="h-full rounded-3xl bg-[#f5f5f7] p-8 transition-shadow hover:shadow-[0_8px_32px_rgba(0,0,0,0.08)]">
-                <p className="whitespace-nowrap text-3xl font-semibold tracking-tight text-[#1d1d1f] md:text-4xl">
-                  <AnimatedNumber
-                    value={s.value}
-                    prefix={s.prefix}
-                    suffix={s.suffix}
-                    decimals={s.decimals}
-                  />
-                </p>
-                <p className="mt-3 text-sm leading-relaxed text-[#6e6e73]">{s.label}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-
-        <Reveal className="mt-4">
+        <Reveal className="mt-14">
           <div className="rounded-3xl bg-[#f5f5f7] p-8">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <p className="text-base font-semibold text-[#1d1d1f]">
-                  Censo Valor 1000 — receita líquida 2023 (R$ milhões conforme fonte)
-                </p>
-                <p className="mt-1 text-sm text-[#6e6e73]">
-                  {rows.length} de {mapaEmpresas46.length} empresas
-                </p>
-              </div>
-              <div className="flex gap-2">
-                {filters.map((f) => (
-                  <button
-                    key={f.value}
-                    onClick={() => setFilter(f.value)}
-                    className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                      filter === f.value
-                        ? "bg-[#1d1d1f] text-white"
-                        : "bg-white text-[#6e6e73] shadow-[0_1px_4px_rgba(0,0,0,0.05)] hover:text-[#1d1d1f]"
-                    }`}
-                  >
-                    {f.label}
-                  </button>
-                ))}
-              </div>
+            <p className="text-base font-semibold text-[#1d1d1f]">Receita líquida — empresas listadas do setor</p>
+            <p className="mt-1 text-sm text-[#6e6e73]">Receita de venda de bens e serviços, demonstração consolidada</p>
+            <div className="mt-6 overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-white">
+                    <TableHead className="text-[#6e6e73]">Empresa</TableHead>
+                    <TableHead className="text-right text-[#6e6e73]">Receita</TableHead>
+                    <TableHead className="hidden text-right text-[#6e6e73] sm:table-cell">Ano anterior</TableHead>
+                    <TableHead className="text-right text-[#6e6e73]">Variação</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {EMPRESAS_LISTADAS.map((e) => (
+                    <TableRow key={e.cnpj} className="border-white">
+                      <TableCell className="font-medium text-[#1d1d1f]">
+                        <span className="flex items-center gap-2.5" title={`CNPJ ${e.cnpj}${e.nota ? " · " + e.nota : ""}`}>
+                          <CompanyLogo name={e.empresa} size={20} />
+                          <span>
+                            {e.empresa}
+                            {e.periodo !== "2025" && <span className="ml-1.5 text-[11px] font-normal text-[#86868b]">({e.periodo})</span>}
+                          </span>
+                        </span>
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap text-right tabular-nums text-[#1d1d1f]">{reais(e.receita)}</TableCell>
+                      <TableCell className="hidden whitespace-nowrap text-right tabular-nums text-[#6e6e73] sm:table-cell">{reais(e.receitaAnterior)}</TableCell>
+                      <TableCell className="text-right tabular-nums text-[#6e6e73]">{pct((e.receita / e.receitaAnterior - 1) * 100)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
-            <div className="mt-6">
-              <EmpresaTable rows={rows} />
-            </div>
+            <a href={FONTE_CVM.url} target="_blank" rel="noreferrer" className="mt-4 block text-[11px] text-[#86868b] underline-offset-2 hover:underline">
+              Fonte: {FONTE_CVM.rotulo} · {FONTE_CVM.data} ↗
+            </a>
           </div>
         </Reveal>
 
         <Reveal className="mt-4">
-          <div className="rounded-3xl bg-[#f5f5f7] p-8">
-            <p className="text-base font-semibold text-[#1d1d1f]">Fatos de mercado (set/2026)</p>
-            <ul className="mt-5 grid gap-3 md:grid-cols-2">
-              {fatosNovos.map((f) => (
-                <li key={f} className="flex gap-3 text-sm leading-relaxed text-[#6e6e73]">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#d2d2d7]" />
-                  {f}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </Reveal>
-
-        <Reveal>
-          <p className="mt-8 text-xs text-[#86868b]">
-            Fonte do censo: Valor 1000 (12/11/2024) — receita líquida 2023, baseada em balanços
-            auditados na CVM. Maturidade de IA: canais oficiais das empresas (Agência Petrobras,
-            RI Vibra — Relato Integrado 2024 auditado, sites Braskem/Raízen) e declarações
-            on-record à imprensa major (set/2026). Censo estendido com trading, logística e
-            regionais no arquivo 04-empresas-completo.md. Auditoria completa de fontes:
-            06-fontes.md.
-          </p>
+          <ul className="grid gap-4 md:grid-cols-2">
+            {fatosNovos.map((f) => (
+              <li key={f.texto} className="rounded-3xl bg-[#f5f5f7] p-7 text-sm leading-relaxed text-[#1d1d1f]">
+                {f.texto}
+                <a href={f.fonte.url} target="_blank" rel="noreferrer" className="mt-3 block text-[11px] text-[#86868b] underline-offset-2 hover:underline">
+                  Fonte: {f.fonte.rotulo} ↗
+                </a>
+              </li>
+            ))}
+          </ul>
         </Reveal>
       </div>
     </section>
@@ -219,8 +89,7 @@ export function Cadeia() {
             Tudo que é humano e manual é passível de automação.
           </h2>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[#6e6e73]">
-            Raio-X operacional da cadeia completa — da sonda ao bico. Clique em cada elo para
-            ver o estado atual, o que a IA já provou no mercado e o ganho esperado.
+            Raio-X operacional da cadeia completa — da sonda ao bico: como cada elo funciona hoje e onde a IA entra.
           </p>
         </Reveal>
 
@@ -252,7 +121,7 @@ export function Cadeia() {
                   </div>
                   <div>
                     <p className="text-xs font-medium uppercase tracking-wide text-[#86868b]">
-                      Ganho provado
+                      Onde a IA entra
                     </p>
                     <p className="mt-1.5 text-sm font-medium leading-relaxed text-[#1d1d1f]">
                       {c.ganho}
@@ -288,9 +157,7 @@ export function Cadeia() {
 
         <Reveal>
           <p className="mt-8 text-xs text-[#86868b]">
-            Mapa completo, processo a processo, com referências e ganhos: arquivo
-            05-cadeia-processos.md. Metodologia para abrir o operacional: mapa de valor
-            cronometrado → inventário de dados dormindo → matriz impacto × facilidade →
+            Como começamos: mapa de valor cronometrado → inventário dos dados que já existem → matriz impacto × facilidade →
             piloto de 2 semanas → escala em agentes.
           </p>
         </Reveal>

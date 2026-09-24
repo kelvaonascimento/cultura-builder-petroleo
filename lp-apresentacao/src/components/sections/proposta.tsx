@@ -5,22 +5,32 @@ export function Final() {
     <>
       <section className="bg-white py-20 md:py-28">
         <div className="mx-auto max-w-6xl px-6">
-          <h2 className="text-2xl font-semibold tracking-tight text-[#1d1d1f] md:text-3xl">
+          <div className="rounded-3xl bg-[#1d1d1f] p-10 text-white md:p-14">
+            <p className="text-sm font-medium text-white/60">Próximo passo</p>
+            <h2 className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight md:text-5xl">
+              Um processo, duas semanas, um piloto funcionando com os seus dados.
+            </h2>
+            <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/70 md:text-lg">
+              Escolhemos juntos um processo da operação — margem por praça, conciliação fiscal, suprimento ou atendimento
+              B2B —, medimos quanto tempo ele consome hoje e entregamos um piloto rodando sobre os dados que a empresa já tem.
+            </p>
+          </div>
+          <h2 className="mt-16 text-2xl font-semibold tracking-tight text-[#1d1d1f] md:text-3xl">
             Como ler esta pesquisa.
           </h2>
           <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
             {[
               [
-                "Núcleo duro",
-                "Receitas do Valor 1000 (balanços auditados na CVM), planilha oficial da ANP (RenovaBio) e Boletim de Reservas 2025 — verificadas nos arquivos do projeto.",
+                "Dado oficial",
+                "Vendas, postos, reservas, produção e RenovaBio vêm dos dados abertos da ANP; leis e MPs do Planalto; ICMS do CONFAZ; câmbio e Selic do Banco Central; Brent da EIA. Cada número tem link e data.",
               ],
               [
-                "Imprensa major",
-                "Cases de IA brasileiros (Vibra, Raízen, Braskem, Petrobras) declarados em veículos nacionais e canais oficiais das empresas.",
+                "Casos de IA",
+                "Só entram casos com comunicado oficial da empresa ou reportagem identificada, com veículo e data. O que não tinha fonte confirmável foi retirado.",
               ],
               [
-                "Estimativas marcadas",
-                "Benchmarks internacionais e modelagens próprias estão identificadas como ordens de grandeza — nada está apresentado como medida auditada.",
+                "Simulação marcada",
+                "A DEMO usa uma empresa fictícia: os números internos dela são simulados e aparecem marcados. Cotações, normas, rotas e dados de mercado são reais.",
               ],
             ].map(([t, d]) => (
               <div key={t} className="rounded-3xl bg-[#f5f5f7] p-8">
@@ -30,10 +40,8 @@ export function Final() {
             ))}
           </div>
           <p className="mt-10 text-xs leading-relaxed text-[#86868b]">
-            A simulação operacional da seção anterior usa uma empresa fictícia com dados
-            sintéticos gerados em tempo real — nenhum número da demo representa uma empresa
-            real. Os benchmarks de mercado citados na torre (Vibra, Petrobras, ANP) são os
-            mesmos auditados nesta página.
+            Na DEMO, nenhum número interno representa uma empresa real: o porte da empresa fictícia foi calibrado em
+            padrões públicos do setor, com nomes e cidades trocados.
           </p>
         </div>
       </section>
@@ -62,8 +70,7 @@ export function Final() {
           </ul>
           <div className="mt-10 border-t border-[#d2d2d7] pt-6">
             <p className="text-xs leading-relaxed text-[#86868b]">
-              Cultura Builder · Documento de apresentação (não é captação de leads) ·
-              Setembro 2026 · Dados de fontes públicas; números conforme citado nas fontes.
+              Cultura Builder · Setembro de 2026 · Todos os números com fonte pública e data de referência.
             </p>
           </div>
         </div>

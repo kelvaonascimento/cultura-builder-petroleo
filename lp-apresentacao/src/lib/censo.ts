@@ -174,8 +174,8 @@ export function tier(m: number): 1 | 2 | 3 | 4 {
 }
 
 export const TIERS = [
-  { id: 1, nome: "G1 · Gigantes", crit: "≥ 2.000.000 CBIOs", serv: "Jogos digitais, IA de trading e logística em escala" },
-  { id: 2, nome: "G2 · Grandes regionais", crit: "500 mil – 2 mi CBIOs", serv: "Os 'vencedores regionais' — o elo onde a região Nordeste brilha" },
-  { id: 3, nome: "G3 · Médias", crit: "100 – 500 mil CBIOs", serv: "Coração do mid-market: preço, janela e crédito" },
-  { id: 4, nome: "G4 · Locais", crit: "< 100 mil CBIOs", serv: "Base longa: back-office e conformidade" },
+  { id: 1, nome: "G1 · Maiores obrigações", crit: "≥ 2.000.000 CBIOs", serv: "Compra e aposentadoria em escala: preço, janela de compra e caixa" },
+  { id: 2, nome: "G2 · Grandes", crit: "500 mil – 2 mi CBIOs", serv: "Meta de CBIO planejada junto com a compra de biocombustíveis" },
+  { id: 3, nome: "G3 · Médias", crit: "100 – 500 mil CBIOs", serv: "Controle de meta, caixa e prazos" },
+  { id: 4, nome: "G4 · Locais", crit: "< 100 mil CBIOs", serv: "Conformidade e prazos sem planilha" },
 ] as const;

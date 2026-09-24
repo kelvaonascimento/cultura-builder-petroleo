@@ -19,7 +19,7 @@ function fmtInt(v: number) {
 }
 
 function fmtPct(p: number | null) {
-  if (p === null) return "—";
+  if (p === null) return "liminar";
   const s = p % 1 === 0 ? String(Math.round(p)) : p.toFixed(2).replace(".", ",");
   return `${s} %`;
 }
@@ -48,19 +48,22 @@ function CensoTable({ rows }: { rows: (Distribuidora & { rank: number })[] }) {
         <TableRow className="border-white">
           <TableHead className="w-10 text-[#6e6e73]">#</TableHead>
           <TableHead className="text-[#6e6e73]">Distribuidora</TableHead>
-          <TableHead className="w-40 text-right text-[#6e6e73]">Meta CBIO 2025</TableHead>
+          <TableHead className="w-40 text-right text-[#6e6e73]">A aposentar (2025)</TableHead>
           <TableHead className="w-24 text-right text-[#6e6e73]">Cumprimento</TableHead>
-          <TableHead className="w-24 text-center text-[#6e6e73]">Tier</TableHead>
+          <TableHead className="hidden w-24 text-center text-[#6e6e73] md:table-cell">Grupo</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {rows.map((d) => (
           <TableRow key={d.rs} className="border-white">
             <TableCell className="text-[#6e6e73]">{d.rank}</TableCell>
-            <TableCell className="font-medium text-[#1d1d1f]">{d.rs}</TableCell>
+            <TableCell className="whitespace-normal font-medium text-[#1d1d1f]">
+              {d.rs}
+              {/sub judice/i.test(d.obs) && <span className="ml-2 rounded-full bg-white px-2 py-0.5 text-[10px] font-medium text-[#6e6e73]" title={d.obs}>sub judice</span>}
+            </TableCell>
             <TableCell className="text-right tabular-nums text-[#1d1d1f]">{fmtInt(d.meta)}</TableCell>
             <TableCell className={`text-right tabular-nums ${pctTone(d.pct)}`}>{fmtPct(d.pct)}</TableCell>
-            <TableCell className="text-center">
+            <TableCell className="hidden text-center md:table-cell">
               <span className={tierBadge(tier(d.meta))}>G{tier(d.meta)}</span>
             </TableCell>
           </TableRow>
@@ -71,13 +74,18 @@ function CensoTable({ rows }: { rows: (Distribuidora & { rank: number })[] }) {
 }
 
 const abaixo100 = DISTRIBUIDORAS.filter((d) => d.pct !== null && d.pct < 100).length;
-const zeradas19 = DISTRIBUIDORAS.filter((d) => d.pct === 0).length;
+const zeradas = DISTRIBUIDORAS.filter((d) => d.pct === 0).length;
+const cumpriram = DISTRIBUIDORAS.filter((d) => d.pct === 100).length;
+const liminar = DISTRIBUIDORAS.filter((d) => d.pct === null).length;
+const porMeta = [...DISTRIBUIDORAS].sort((a, b) => b.meta - a.meta);
+const fatia = (n: number) =>
+  ((porMeta.slice(0, n).reduce((s, d) => s + d.meta, 0) / TOTAL_CBIOS) * 100).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 const kpis = [
-  { v: "25", l: "distribuidoras no Top 25 — 79,7% do volume nacional" },
-  { v: "46,1 mi", l: "CBIOs em metas 2025" },
-  { v: "56,6 %", l: "do volume nas 5 maiores" },
-  { v: String(abaixo100), l: `fora de 100% (${zeradas19} zeradas; risco de juros SELIC)` },
+  { v: TOTAL_CBIOS.toLocaleString("pt-BR"), l: "CBIOs a aposentar em 2025 (metas + saldo de 2024)" },
+  { v: `${fatia(25)}%`, l: "do total está nas 25 maiores obrigações" },
+  { v: String(cumpriram), l: "distribuidoras cumpriram 100%" },
+  { v: String(abaixo100), l: `abaixo de 100% (${zeradas} com 0%); ${liminar} sem percentual por liminar` },
 ];
 
 export function Censo() {
@@ -90,9 +98,10 @@ export function Censo() {
   );
 
   const filtradas = useMemo(() => {
-    const t = q.trim().toUpperCase();
+    const norm = (x: string) => x.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+    const t = norm(q.trim());
     if (!t) return null;
-    return ranked.filter((d) => d.rs.toUpperCase().includes(t));
+    return ranked.filter((d) => norm(d.rs).includes(t));
   }, [q, ranked]);
 
   const tierStats = useMemo(
@@ -110,15 +119,15 @@ export function Censo() {
   return (
     <section id="censo" className="mx-auto w-full max-w-6xl px-6 py-28 md:py-40">
       <Reveal>
-        <p className="text-sm font-medium text-[#6e6e73]">Termômetro de volume · ANP × RenovaBio 2025</p>
+        <p className="text-sm font-medium text-[#6e6e73]">RenovaBio · cumprimento das metas de 2025 (ANP)</p>
         <h2 className="mt-3 text-4xl font-semibold tracking-tight text-[#1d1d1f] md:text-6xl">
-          As 25 maiores movem 80% do país.
+          163 distribuidoras, uma meta de descarbonização.
         </h2>
         <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[#6e6e73]">
-          O benchmark de receita é o Valor 1000 (as 46 maiores). Este mapa ANP mede o que
-          ninguém mais vê: volume real de diesel distribuído, via meta CBIO — dado público
-          e auditado. As 163 completas ficam no arquivo oficial da ANP; aqui fica o que
-          importa.
+          Cada distribuidora de combustíveis fósseis precisa aposentar créditos de descarbonização (CBIOs) na
+          proporção das suas vendas. A planilha oficial da ANP soma a meta de 2025 com o que ficou pendente de 2024 —
+          por isso algumas posições aparecem acima do tamanho de mercado. Para participação de mercado, veja o ranking
+          de vendas acima.
         </p>
       </Reveal>
 
@@ -141,7 +150,7 @@ export function Censo() {
             <p className="mt-4 text-2xl font-semibold tracking-tight text-[#1d1d1f]">
               {(t.vol * 100).toFixed(1).replace(".", ",")} %
             </p>
-            <p className="text-sm text-[#6e6e73]">do volume nacional</p>
+            <p className="text-sm text-[#6e6e73]">do total a aposentar</p>
             <p className="mt-3 text-[13px] leading-snug text-[#6e6e73]">{t.serv}</p>
           </div>
         ))}
@@ -154,7 +163,7 @@ export function Censo() {
               ? `${filtradas.length} resultado${filtradas.length === 1 ? "" : "s"} para “${q}” no censo completo (163)`
               : full
                 ? "Censo completo — 163 distribuidoras (fonte oficial ANP)"
-                : "Top 25 por volume real — 79,7% do diesel do país"}
+                : `25 maiores obrigações — ${fatia(25)}% do total`}
           </p>
           <div className="flex items-center gap-3">
             <input
@@ -194,11 +203,17 @@ export function Censo() {
           </div>
         </div>
         <p className="mt-3 text-xs text-[#6e6e73]">
-          Fonte: ANP, Relatório de Cumprimento de Metas de CBIO 2025 — dado público (planilha
-          oficial em fontes/anp-relatorio-cumprimento-meta-2025.xlsx; 167 linhas, 163
-          distribuidoras). Déficit de CBIO rende juros sobre a taxa SELIC (Lei 13.576/2017,
-          art. 6º). Benchmark de receita: Valor 1000, as 46 maiores de O&amp;G (seção
-          anterior).
+          Fonte:{" "}
+          <a
+            href="https://www.gov.br/anp/pt-br/assuntos/renovabio/cumprimento-das-metas-individuais-de-2025-por-distribuidor-de-combustiveis"
+            target="_blank"
+            rel="noreferrer"
+            className="underline-offset-2 hover:underline"
+          >
+            ANP — cumprimento das metas individuais de 2025 por distribuidor (publicado em 30/01/2026, atualizado em 14/07/2026) ↗
+          </a>
+          . &quot;Liminar&quot; = cumprimento suspenso por decisão judicial. Descumprir a meta é crime ambiental, com multa de
+          R$ 100.000,00 a R$ 500.000.000,00 (Lei 15.082/2024).
         </p>
       </Reveal>
     </section>

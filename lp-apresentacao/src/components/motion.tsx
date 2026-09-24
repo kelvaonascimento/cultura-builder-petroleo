@@ -71,7 +71,8 @@ export function AnimatedNumber({
   className?: string;
 }) {
   const { ref, inView } = useInView<HTMLSpanElement>(0.4);
-  const [display, setDisplay] = useState(0);
+  // antes de animar (sem JS, impressão, leitor de tela) mostra o valor final, nunca "0"
+  const [display, setDisplay] = useState<number | null>(null);
   const started = useRef(false);
   useEffect(() => {
     if (!inView || started.current) return;
@@ -87,7 +88,7 @@ export function AnimatedNumber({
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [inView, value, duration]);
-  const text = display.toLocaleString("pt-BR", {
+  const text = (display ?? value).toLocaleString("pt-BR", {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   });

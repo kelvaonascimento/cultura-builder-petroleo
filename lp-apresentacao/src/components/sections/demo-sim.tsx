@@ -126,14 +126,14 @@ export const JORNADA = [
 ];
 
 export const POSTOS: [string, string][] = [
-  ["Posto Vale Verde", "Feira de Santana/BA"],
-  ["Posto Almeida", "Camaçari/BA"],
-  ["Rede Xavier", "Santo Amaro/BA"],
-  ["Posto Cordeiro", "Barreiras/BA"],
-  ["Posto Rio Real", "Alagoinhas/BA"],
-  ["Posto Lago Azul", "Alagoinhas/BA"],
-  ["Rede Costa", "Lauro de Freitas/BA"],
-  ["Auto Posto Sertão", "Irecê/BA"],
+  ["Posto Cliente 117", "Feira de Santana/BA"],
+  ["Posto Cliente 204", "Camaçari/BA"],
+  ["Rede Cliente 318", "Santo Amaro/BA"],
+  ["Posto Cliente 402", "Barreiras/BA"],
+  ["Posto Cliente 526", "Alagoinhas/BA"],
+  ["Posto Cliente 611", "Alagoinhas/BA"],
+  ["Rede Cliente 735", "Lauro de Freitas/BA"],
+  ["Posto Cliente 829", "Irecê/BA"],
 ];
 
 export const PRODUTOS = ["Diesel S10", "Gasolina C", "Diesel S500", "Etanol"];
@@ -165,7 +165,7 @@ export const AGENTES_INICIAIS: Agente[] = [
 
 const MOTORISTAS = ["Rodrigo M.", "Elaine S.", "Carlos T.", "Bruna F.", "Tiago A.", "Marcos L.", "Fernanda P.", "Diego R.", "Ana C.", "Jailson N."];
 
-const PLACAS = ["HZK-3E12", "OQF-8B47", "RTX-1A90", "VBM-6D33", "PLG-9F71", "KDN-4H20", "STW-7C58", "BZX-2J64", "FRN-5K18", "MRP-0L95"];
+const PLACAS = ["CT-03", "CT-06", "CT-08", "CT-10", "CT-07", "CT-04", "CT-09", "CT-01", "CT-02", "CT-05"];
 
 function rndPlaca(i: number) {
   return PLACAS[i % PLACAS.length];
@@ -227,10 +227,10 @@ const EVENTOS_IA: [string, string][] = [
   ["PREÇO", "Copiloto recalculou 480 preços com o novo custo de reposição."],
   ["LOG", "Caminhão entregue dentro da janela — comprovante digital assinado."],
   ["FISC", "Volumes reconciliados no consolidado ANP/RenovaBio."],
-  ["REDE", "Posto Cordeiro: demanda +9% — IA sugere escalar volume."],
+  ["REDE", "Posto Cliente 402: demanda +9% — IA sugere escalar volume."],
   ["CRÉD", "Consulta de crédito concluída em 40 segundos."],
   ["COBR", "Acordo de pagamento fechado por agente — parcelamento aceito."],
-  ["SEG", "Padrão de lavração detectado: 3 tanques divergentes — auditoria aberta."],
+  ["SEG", "Divergência de medição em 3 tanques — auditoria aberta."],
   ["TRAD", "Brent e câmbio fecharam a janela de importação: compra redirecionada ao fornecedor nacional."],
   ["REDE", "Câmeras + IA: 2 abastecimentos com padrão de bomba-truque — OS aberta."],
 ];
@@ -248,6 +248,10 @@ const EVENTOS_MAN: [string, string][] = [
   ["REDE", "Posto com queda de demanda descoberta no relatório mensal."],
 ];
 
+const VOLUME_DIA = 7_800_000; // litros/dia do porte calibrado
+const TETO_CAPTURADO = 420_000;
+const TETO_NA_MESA = 360_000;
+
 export function useSim(): SimData {
   const [tick, setTick] = useState(0);
   const [modo, setModoState] = useState<Modo>("integrada");
@@ -258,6 +262,7 @@ export function useSim(): SimData {
 
   // porte calibrado numa regional grande (~7.800 m³/dia); preço médio de venda ≈ R$ 5,44/L pelo mix
   const [volume, setVolume] = useState(2_350_000);
+  const volRef = useRef(2_350_000);
   const [receita, setReceita] = useState(12_784_000);
   const [margem, setMargem] = useState(2.38);
   const [janela, setJanela] = useState(96);
@@ -268,15 +273,15 @@ export function useSim(): SimData {
   const [naMesa, setNaMesa] = useState(0);
 
   const [ordens, setOrdens] = useState<Ordem[]>([
-    { id: "P-8412", posto: "Posto Vale Verde", cidade: "Feira de Santana/BA", produto: "Diesel S10", volume: 20000, valor: 122_400, score: 92, step: 5, stepTick: 0 },
-    { id: "P-8413", posto: "Posto Almeida", cidade: "Camaçari/BA", produto: "Gasolina C", volume: 12000, valor: 63_720, score: 88, step: 3, stepTick: 0 },
-    { id: "P-8414", posto: "Rede Xavier", cidade: "Santo Amaro/BA", produto: "Diesel S500", volume: 34000, valor: 197_030, score: 76, step: 1, stepTick: 0 },
+    { id: "P-8412", posto: "Posto Cliente 117", cidade: "Feira de Santana/BA", produto: "Diesel S10", volume: 20000, valor: 122_400, score: 92, step: 5, stepTick: 0 },
+    { id: "P-8413", posto: "Posto Cliente 204", cidade: "Camaçari/BA", produto: "Gasolina C", volume: 12000, valor: 63_720, score: 88, step: 3, stepTick: 0 },
+    { id: "P-8414", posto: "Rede Cliente 318", cidade: "Santo Amaro/BA", produto: "Diesel S500", volume: 34000, valor: 197_030, score: 76, step: 1, stepTick: 0 },
   ]);
 
   const [cotacoes, setCotacoes] = useState<Cotacao[]>([
-    { id: "C-5011", posto: "Auto Posto Sertão", cidade: "Irecê/BA", produto: "Diesel S10", volume: 28000, minuto: 366, respEm: null, valor: 163_520 },
-    { id: "C-5012", posto: "Rede Costa", cidade: "Lauro de Freitas/BA", produto: "Gasolina C", volume: 9000, minuto: 372, respEm: 374, valor: 47_790 },
-    { id: "C-5013", posto: "Posto Rio Real", cidade: "Alagoinhas/BA", produto: "Etanol", volume: 14000, minuto: 380, respEm: null, valor: 58_660 },
+    { id: "C-5011", posto: "Posto Cliente 829", cidade: "Irecê/BA", produto: "Diesel S10", volume: 28000, minuto: 366, respEm: null, valor: 163_520 },
+    { id: "C-5012", posto: "Rede Cliente 735", cidade: "Lauro de Freitas/BA", produto: "Gasolina C", volume: 9000, minuto: 372, respEm: 374, valor: 47_790 },
+    { id: "C-5013", posto: "Posto Cliente 526", cidade: "Alagoinhas/BA", produto: "Etanol", volume: 14000, minuto: 380, respEm: null, valor: 58_660 },
   ]);
 
   const [tanques, setTanques] = useState<Tanque[]>([
@@ -304,21 +309,21 @@ export function useSim(): SimData {
   const [eventos, setEventos] = useState<Evento[]>([
     { t: 0, tipo: "IA", msg: "Previsão de demanda Barreiras: +8% na quinzena do dia 12." },
     { t: 0, tipo: "LOG", msg: "Rota Feira de Santana → Barreiras reordenada: -12% km vazio." },
-    { t: 0, tipo: "CRÉD", msg: "Limite pré-aprovado: Posto Vale Verde R$ 340 mil." },
+    { t: 0, tipo: "CRÉD", msg: "Limite pré-aprovado: Posto Cliente 117 R$ 340 mil." },
   ]);
 
   const [agentes, setAgentes] = useState<Agente[]>(AGENTES_INICIAIS);
   const [cobrancas, setCobrancas] = useState<Cobranca[]>([
-    { id: "F-2231", posto: "Posto Cordeiro", valor: 48_200, dias: 34, status: "aguardando" },
-    { id: "F-2232", posto: "Rede Xavier", valor: 91_400, dias: 61, status: "em negociação" },
-    { id: "F-2233", posto: "Posto Rio Real", valor: 27_800, dias: 12, status: "aguardando" },
-    { id: "F-2234", posto: "Auto Posto Sertão", valor: 63_500, dias: 96, status: "sem contato" },
-    { id: "F-2235", posto: "Posto Lago Azul", valor: 18_900, dias: 3, status: "aguardando" },
+    { id: "F-2231", posto: "Posto Cliente 402", valor: 48_200, dias: 34, status: "aguardando" },
+    { id: "F-2232", posto: "Rede Cliente 318", valor: 91_400, dias: 61, status: "em negociação" },
+    { id: "F-2233", posto: "Posto Cliente 526", valor: 27_800, dias: 12, status: "aguardando" },
+    { id: "F-2234", posto: "Posto Cliente 829", valor: 63_500, dias: 96, status: "sem contato" },
+    { id: "F-2235", posto: "Posto Cliente 611", valor: 18_900, dias: 3, status: "aguardando" },
   ]);
   const [incidentes] = useState<Incidente[]>([
-    { id: "INC-81", tipo: "Divergência de tanque (lavração?)", local: "Base Camaçari", nivel: "medio", status: "investigando", ts: 240 },
-    { id: "INC-82", tipo: "Padrão de bomba-truque", local: "Posto Almeida · Camaçari", nivel: "alto", status: "OS aberta", ts: 288 },
-    { id: "INC-83", tipo: "Desvio de rota 22 km", local: "Caminhão RTX-1A90", nivel: "baixo", status: "resolvido", ts: 312 },
+    { id: "INC-81", tipo: "Divergência de medição de tanque", local: "Base Camaçari", nivel: "medio", status: "investigando", ts: 240 },
+    { id: "INC-82", tipo: "Padrão de bomba-truque", local: "Posto Cliente 204 · Camaçari", nivel: "alto", status: "OS aberta", ts: 288 },
+    { id: "INC-83", tipo: "Desvio de rota 22 km", local: "Caminhão CT-08", nivel: "baixo", status: "resolvido", ts: 312 },
   ]);
   const [caixa, setCaixa] = useState<{ d: number; in: number; out: number }[]>(
     serieDias(12, 17, 1.24, 0.5).map((v, i) => ({ d: i, in: v, out: +(v * 0.82).toFixed(2) })),
@@ -337,10 +342,13 @@ export function useSim(): SimData {
       const m = modoRef.current;
       tickRef.current += 1;
       setTick((t) => t + 1);
+      // o "dia" tem teto (~7.800 m³, porte calibrado): os totais param de subir quando o dia fecha
       const inc = (m === "integrada" ? 36 + Math.round(Math.random() * 24) : 21 + Math.round(Math.random() * 13)) * 1000;
-      setVolume((v) => v + inc);
-      setReceita((r) => Math.round((r + inc * 5.44) * 100) / 100);
-      setNfe((n) => n + (m === "integrada" ? 14 + Math.round(Math.random() * 12) : 6 + Math.round(Math.random() * 6)));
+      const efetivo = Math.min(inc, Math.max(0, VOLUME_DIA - volRef.current));
+      volRef.current += efetivo;
+      setVolume(volRef.current);
+      setReceita((r) => Math.round((r + efetivo * 5.44) * 100) / 100);
+      if (efetivo > 0) setNfe((n) => n + (m === "integrada" ? 14 + Math.round(Math.random() * 12) : 6 + Math.round(Math.random() * 6)));
 
       const alvoMargem = m === "integrada" ? 2.86 : 2.06;
       const alvoJanela = m === "integrada" ? 96 : 84;
@@ -349,8 +357,8 @@ export function useSim(): SimData {
       setJanela((v) => Math.round(v + (alvoJanela - v) * 0.3 + (Math.random() - 0.5) * 2));
       setKmVazio((v) => +(v + (alvoKm - v) * 0.3 + (Math.random() - 0.5) * 0.4).toFixed(1));
       setAlertas(() => Math.max(1, Math.round((m === "integrada" ? 3 : 9) + (Math.random() - 0.5) * 2)));
-      if (m === "integrada") setCapturado((c) => c + 3_200 + Math.round(Math.random() * 1_400));
-      else setNaMesa((n) => n + 2_300 + Math.round(Math.random() * 1_200));
+      if (m === "integrada") setCapturado((c) => Math.min(TETO_CAPTURADO, c + 3_200 + Math.round(Math.random() * 1_400)));
+      else setNaMesa((n) => Math.min(TETO_NA_MESA, n + 2_300 + Math.round(Math.random() * 1_200)));
 
       /* ordens avançam nos 8 sistemas */
       setOrdens((ords) => {
@@ -361,7 +369,12 @@ export function useSim(): SimData {
           if (novoTick >= passo) return { ...o, step: o.step + 1, stepTick: 0 };
           return { ...o, stepTick: novoTick };
         });
-        if (next.length < 6 && Math.random() < 0.22) {
+        const concluidas = next.filter((o) => o.step >= SISTEMAS.length);
+        if (concluidas.length > 2) {
+          const velha = concluidas[concluidas.length - 1];
+          next = next.filter((o) => o !== velha);
+        }
+        if (next.length < 6 && Math.random() < 0.35) {
           const pi = Math.floor(Math.random() * POSTOS.length);
           const prod = PRODUTOS[Math.floor(Math.random() * PRODUTOS.length)];
           const vol = 8000 + Math.floor(Math.random() * 30) * 1000;
@@ -393,7 +406,12 @@ export function useSim(): SimData {
           if (tickRef.current - c.minuto >= atraso) return { ...c, respEm: tickRef.current };
           return c;
         });
-        if (next.length < 6 && Math.random() < 0.3) {
+        const respondidas = next.filter((c) => c.respEm !== null);
+        if (respondidas.length > 2) {
+          const velha = respondidas[respondidas.length - 1];
+          next = next.filter((c) => c !== velha);
+        }
+        if (next.length < 6 && Math.random() < 0.4) {
           const pi = Math.floor(Math.random() * POSTOS.length);
           const prod = PRODUTOS[Math.floor(Math.random() * PRODUTOS.length)];
           const vol = 8000 + Math.floor(Math.random() * 30) * 1000;
@@ -412,13 +430,12 @@ export function useSim(): SimData {
         ts.map((tq) => {
           let nivel = tq.nivel - (tq.base === "Camaçari" ? 1.7 : 1.1);
           let repostaEm = tq.repostaEm;
-          if (m === "integrada") {
-            if (repostaEm > 0) {
-              repostaEm -= 1;
-              if (repostaEm === 0) nivel += 30;
-            } else if (nivel < 35) {
-              repostaEm = 2;
-            }
+          // Integrada: agente pede reposição cedo (35%); Manual: alguém percebe tarde (18%) e demora mais
+          if (repostaEm > 0) {
+            repostaEm -= 1;
+            if (repostaEm === 0) nivel += 30;
+          } else if (nivel < (m === "integrada" ? 35 : 18)) {
+            repostaEm = m === "integrada" ? 2 : 6;
           }
           nivel = Math.max(4, Math.min(97, nivel));
           return { ...tq, nivel, cover: Math.round(nivel / 7), repostaEm, critico: nivel < 16 };
@@ -444,13 +461,16 @@ export function useSim(): SimData {
       /* preços com concorrente */
       setPrecos((ps) =>
         ps.map((p) => {
-          const drift = m === "integrada" ? (Math.random() - 0.5) * 0.006 : -0.002 - Math.random() * 0.003;
+          // Manual: preço escorrega atrás do vizinho, mas nunca abaixo do custo + 3 centavos
+          // Integrada: copiloto puxa de volta para o preço sugerido
+          const custo = +(p.custo + (Math.random() - 0.5) * 0.004).toFixed(3);
+          const alvo = m === "integrada" ? p.preco + (p.sugerido - p.preco) * 0.2 + (Math.random() - 0.5) * 0.004 : p.preco - 0.002 - Math.random() * 0.003;
           const dConc = (Math.random() - 0.5) * 0.012;
           return {
             ...p,
-            preco: Math.max(4.0, +(p.preco + drift).toFixed(3)),
+            custo,
+            preco: Math.max(custo + 0.03, +alvo.toFixed(3)),
             concorrente: Math.max(4.0, +(p.concorrente + dConc).toFixed(3)),
-            custo: +(p.custo + (Math.random() - 0.5) * 0.004).toFixed(3),
           };
         }),
       );
@@ -503,7 +523,7 @@ export function useSim(): SimData {
       { tipo: "PREÇO", msg: "Gasolina em Camaçari R$ 0,04 abaixo do piso de margem.", acao: "Aplicar +1,2%", chave: "preco-pojuca", usada: precos.some((p) => p.base === "Camaçari" && p.aplicado), view: "precos" },
       { tipo: "SUPRI", msg: "Demanda +8% na quinzena do dia 12 — antecipar 2 cargas.", acao: "Antecipar carga", chave: "supri-antecipa", usada: aplicadas.includes("supri-antecipa"), view: "suprimento" },
       { tipo: "LOG", msg: "Reordenar Feira → Barreiras economiza 26 km de vazio.", acao: "Reordenar rota", chave: "log-reordena", usada: aplicadas.includes("log-reordena"), view: "logistica" },
-      { tipo: "CRÉD", msg: "Rede Xavier sem resposta há 41h — follow-up com crédito em destaque.", acao: "Enviar follow-up", chave: "cred-follow", usada: aplicadas.includes("cred-follow"), view: "comercial" },
+      { tipo: "CRÉD", msg: "Rede Cliente 318 sem resposta há 41h — follow-up com crédito em destaque.", acao: "Enviar follow-up", chave: "cred-follow", usada: aplicadas.includes("cred-follow"), view: "comercial" },
       { tipo: "COBR", msg: "R$ 24,9 mi vencidos — agente de cobrança pronto para negociar.", acao: "Rodar cobrança", chave: "cobr-rodar", usada: aplicadas.includes("cobr-rodar"), view: "financeiro" },
       { tipo: "FISC", msg: "Consolidado ANP do dia pronto para conferência.", acao: "Assinar consolidado", chave: "fiscal-anp", usada: aplicadas.includes("fiscal-anp"), view: "fiscal" },
     ],
@@ -526,7 +546,7 @@ export function useSim(): SimData {
       setToast("Aplicado: rotas reordenadas — km vazio caiu 0,8 p.p.");
     }
     if (chave === "cred-follow") {
-      setOrdens((os) => os.map((o) => (o.posto === "Rede Xavier" ? { ...o, step: Math.max(o.step, 2) } : o)));
+      setOrdens((os) => os.map((o) => (o.posto === "Rede Cliente 318" ? { ...o, step: Math.max(o.step, 2) } : o)));
       setToast("Aplicado: follow-up enviado com crédito pré-aprovado em destaque.");
     }
     if (chave === "cobr-rodar") {
@@ -566,7 +586,7 @@ function ultimaAcao(id: string): string {
     cobranca: ["Acordo: 3× parcelas", "Lembrete enviado", "Promessa registrada"],
     prospeccao: ["12 bandeiras brancas mapeadas", "Lead Irecê qualificado", "Script de abordagem enviado"],
     compliance: ["Auditoria: 3 divergências", "Checklist ANP ok", "CBIO: 100% em dia"],
-    vendedor: ["Follow-up: Rede Xavier", "Resumo de conta gerado", "Proposta reenviada"],
+    vendedor: ["Follow-up: Rede Cliente 318", "Resumo de conta gerado", "Proposta reenviada"],
   };
   const ops = mapa[id] ?? ["Ação executada"];
   return ops[Math.floor(Math.random() * ops.length)];
