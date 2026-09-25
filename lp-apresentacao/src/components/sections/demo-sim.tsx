@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { corProduto } from "@/demo/cores";
 
 /* ---------- formatação ---------- */
 export const fmtInt = (v: number) => v.toLocaleString("pt-BR", { maximumFractionDigits: 0 });
@@ -179,10 +180,32 @@ export const PAL: Record<Tema, { s1: string; s2: string; s3: string; s4: string;
   dark: { s1: "#f5f5f7", s2: "#a1a1a6", s3: "#636366", s4: "#48484a", ok: "#30d158", warn: "#ff9f0a", err: "#ff453a", info: "#2997ff" },
 };
 
+// cor do produto: a mesma do mapa em todas as telas
 export function prodTone(produto: string, tema: Tema): string {
-  const idx = ["Diesel S10", "Gasolina C", "Diesel S500", "Etanol"].indexOf(produto);
-  const p = PAL[tema];
-  return [p.s1, p.s2, p.s3, p.s4][idx === -1 ? 2 : idx];
+  return corProduto(produto, tema);
+}
+
+// tancagem de cada tanque do painel (soma por base = capacidade da base em malha.json) e venda média diária dele
+export const TANQUE_CAP_M3: Record<string, number> = {
+  "Litoral|Diesel S10": 7_200,
+  "Litoral|Gasolina C": 6_600,
+  "Sertão|Diesel S500": 3_900,
+  "Oeste|Diesel S10": 3_600,
+  "Vale|Gasolina C": 3_300,
+  "Planalto|Etanol": 6_100,
+};
+export const TANQUE_VENDA_M3_DIA: Record<string, number> = {
+  "Litoral|Diesel S10": 1_900,
+  "Litoral|Gasolina C": 1_750,
+  "Sertão|Diesel S500": 720,
+  "Oeste|Diesel S10": 980,
+  "Vale|Gasolina C": 820,
+  "Planalto|Etanol": 950,
+};
+// dias de venda que o tanque cobre no nível atual
+export function coberturaDias(base: string, produto: string, nivel: number) {
+  const k = `${base}|${produto}`;
+  return Math.round((((TANQUE_CAP_M3[k] ?? 0) * nivel) / 100 / (TANQUE_VENDA_M3_DIA[k] ?? 1)) * 10) / 10;
 }
 
 export const AGENTES_INICIAIS: Agente[] = [
@@ -327,12 +350,12 @@ export function useSim(): SimData {
   ]);
 
   const [tanques, setTanques] = useState<Tanque[]>([
-    { base: "Litoral", produto: "Diesel S10", nivel: 62, cover: 9, critico: false, repostaEm: 0 },
-    { base: "Litoral", produto: "Gasolina C", nivel: 54, cover: 8, critico: false, repostaEm: 0 },
-    { base: "Sertão", produto: "Diesel S500", nivel: 71, cover: 10, critico: false, repostaEm: 0 },
-    { base: "Oeste", produto: "Diesel S10", nivel: 47, cover: 7, critico: false, repostaEm: 0 },
-    { base: "Vale", produto: "Gasolina C", nivel: 58, cover: 8, critico: false, repostaEm: 0 },
-    { base: "Planalto", produto: "Etanol", nivel: 66, cover: 9, critico: false, repostaEm: 0 },
+    { base: "Litoral", produto: "Diesel S10", nivel: 62, cover: coberturaDias("Litoral", "Diesel S10", 62), critico: false, repostaEm: 0 },
+    { base: "Litoral", produto: "Gasolina C", nivel: 54, cover: coberturaDias("Litoral", "Gasolina C", 54), critico: false, repostaEm: 0 },
+    { base: "Sertão", produto: "Diesel S500", nivel: 71, cover: coberturaDias("Sertão", "Diesel S500", 71), critico: false, repostaEm: 0 },
+    { base: "Oeste", produto: "Diesel S10", nivel: 47, cover: coberturaDias("Oeste", "Diesel S10", 47), critico: false, repostaEm: 0 },
+    { base: "Vale", produto: "Gasolina C", nivel: 58, cover: coberturaDias("Vale", "Gasolina C", 58), critico: false, repostaEm: 0 },
+    { base: "Planalto", produto: "Etanol", nivel: 66, cover: coberturaDias("Planalto", "Etanol", 66), critico: false, repostaEm: 0 },
   ]);
 
   const [rotas, setRotas] = useState<Rota[]>(() =>
@@ -484,7 +507,7 @@ export function useSim(): SimData {
             repostaEm = m === "integrada" ? 2 : 6;
           }
           nivel = Math.max(4, Math.min(97, nivel));
-          return { ...tq, nivel, cover: Math.round(nivel / 7), repostaEm, critico: nivel < 16 };
+          return { ...tq, nivel, cover: coberturaDias(tq.base, tq.produto, nivel), repostaEm, critico: nivel < 16 };
         }),
       );
 

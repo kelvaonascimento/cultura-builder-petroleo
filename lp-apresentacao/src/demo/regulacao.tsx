@@ -61,15 +61,15 @@ export function RegulacaoView({ sim }: { sim: { modo: Modo; hora: string } }) {
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 @3xl:grid-cols-4">
         <Tile rotulo="Normas monitoradas" valor={String(RADAR.length)} nota="fontes oficiais · situação em 24/09/2026" />
         <Tile rotulo="Agentes em execução" valor={integrada ? String(agentes) : "0"} nota={integrada ? "leem DOU, NF-e, ANP e CONFAZ" : "conferência feita por pessoas"} />
         <Tile rotulo={integrada ? "Checagens hoje" : "Pendências na fila"} valor={fmt(integrada ? checagens : pendentes)} nota={integrada ? "cada NF-e, lote e cliente (simulado)" : "planilhas e e-mails (simulado)"} />
         <Tile rotulo="Prazos em 100 dias" valor={String(PRAZOS.length)} nota={`próximo: ${PRAZOS[0].data}`} />
       </div>
 
-      <div className="grid grid-cols-1 gap-3 xl:grid-cols-12">
-        <section className="rounded-2xl bg-card p-4 ring-1 ring-foreground/[0.07] xl:col-span-7">
+      <div className="grid grid-cols-1 gap-3 @2xl:grid-cols-12">
+        <section className="rounded-2xl bg-card p-4 ring-1 ring-foreground/[0.07] @2xl:col-span-7">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <div>
               <h3 className="text-[13px] font-semibold text-foreground">Radar regulatório</h3>
@@ -88,14 +88,14 @@ export function RegulacaoView({ sim }: { sim: { modo: Modo; hora: string } }) {
               </button>
             ))}
           </div>
-          <div className="mt-3 max-h-[520px] space-y-1.5 overflow-y-auto pr-1">
+          <div className="mt-3 max-h-[520px] space-y-1.5 overflow-y-auto pr-1 @2xl:max-h-[780px]">
             {itens.map((i) => (
               <ItemRadarCard key={i.id} item={i} aberto={aberto === i.id} onToggle={() => setAberto(aberto === i.id ? null : i.id)} />
             ))}
           </div>
         </section>
 
-        <section className="rounded-2xl bg-card p-4 ring-1 ring-foreground/[0.07] xl:col-span-5">
+        <section className="rounded-2xl bg-card p-4 ring-1 ring-foreground/[0.07] @2xl:col-span-5">
           <div className="flex items-center gap-2">
             <Bot className="h-4 w-4 text-foreground/70" />
             <h3 className="text-[13px] font-semibold text-foreground">{integrada ? "Agentes trabalhando agora" : "Fila de conferência manual"}</h3>
@@ -132,7 +132,7 @@ export function RegulacaoView({ sim }: { sim: { modo: Modo; hora: string } }) {
           <h3 className="text-[13px] font-semibold text-foreground">Prazos regulatórios à frente</h3>
           <span className="ml-auto text-[10px] text-muted-foreground">datas oficiais</span>
         </div>
-        <ol className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+        <ol className="mt-3 grid gap-2 @md:grid-cols-2 @3xl:grid-cols-3">
           {PRAZOS.map((p) => (
             <li key={p.o_que} className="rounded-xl bg-secondary px-3 py-2">
               <p className="text-[12px] font-semibold tabular-nums text-foreground">{p.data}</p>

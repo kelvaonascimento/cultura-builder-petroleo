@@ -153,8 +153,8 @@ export default function MapaCalor({ tema = "light" }: { tema?: Tema }) {
   const h = hover ? POR_COD[hover.cod] : null;
 
   return (
-    <div className="grid grid-cols-1 gap-3 xl:grid-cols-12">
-      <div className="relative overflow-hidden rounded-2xl bg-card ring-1 ring-foreground/[0.07] xl:col-span-7">
+    <div className="grid grid-cols-1 gap-3 @2xl:grid-cols-12">
+      <div className="relative overflow-hidden rounded-2xl bg-card ring-1 ring-foreground/[0.07] @2xl:col-span-7">
         <div className="flex flex-wrap items-center gap-2 px-4 pt-3">
           <div className="flex rounded-full bg-secondary p-0.5" role="tablist" aria-label="Camada do mapa">
             {(["oportunidade", "risco"] as Camada[]).map((c) => (
@@ -191,7 +191,7 @@ export default function MapaCalor({ tema = "light" }: { tema?: Tema }) {
         </p>
       </div>
 
-      <div className="space-y-3 xl:col-span-5">
+      <div className="space-y-3 @2xl:col-span-5">
         {u && (
           <section className="rounded-2xl bg-card p-4 ring-1 ring-foreground/[0.07]">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">UF selecionada · clique no mapa para trocar</p>

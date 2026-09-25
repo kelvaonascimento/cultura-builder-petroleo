@@ -9,69 +9,22 @@ import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis
 import { ExternalLink } from "lucide-react";
 import malhaJson from "./malha.json";
 import { chartTheme, margemPorProduto, type SimData, type Tema } from "@/components/sections/demo-sim";
+import { ANTT, CARGA_M3, FONTE_PETROBRAS, linhasPracas, type NoMalha, type RotaMalha } from "./margem-calc";
+import { COR_PRODUTO, corProduto } from "./cores";
 
-type No = { id: string; nome: string; tipo: string; uf: string };
-type Rota = { id: string; de: string; para: string; produto: string; km: number; min: number };
-const NOS = Object.fromEntries((malhaJson as unknown as { nos: No[] }).nos.map((n) => [n.id, n]));
+const NOS = Object.fromEntries((malhaJson as unknown as { nos: NoMalha[] }).nos.map((n) => [n.id, n]));
 
-// ANTT — piso mínimo de frete, carga granel líquido perigosa, 5 eixos (tabela vigente, atualizada em 17/07/2026)
-const ANTT = { porKm: 7.6628, fixo: 861.51, fonte: "https://calculadorafrete.antt.gov.br/" };
-const CARGA_M3 = 45; // capacidade típica de um bitrem-tanque
-
-// Petrobras — "distribuição e revenda" em R$/L (coleta ANP de 13 a 19/09/2026); ausente = Petrobras não publica a UF
-const PETROBRAS_DR: Record<string, { gasolina: number; diesel: number }> = {
-  CE: { gasolina: 2.23, diesel: 2.06 },
-  DF: { gasolina: 1.78, diesel: 1.83 },
-  GO: { gasolina: 1.74, diesel: 1.69 },
-  MG: { gasolina: 1.46, diesel: 1.64 },
-  MT: { gasolina: 1.78, diesel: 2.1 },
-  PE: { gasolina: 2.07, diesel: 2.03 },
-};
-const PETROBRAS_BR = { gasolina: 1.72, diesel: 2.01 };
-const FONTE_PETROBRAS = "https://precos.petrobras.com.br/";
-
-const PRODUTO: Record<string, { rotulo: string; chave: string; ref: "gasolina" | "diesel" | null }> = {
-  gasolina_c: { rotulo: "Gasolina C", chave: "Gasolina C", ref: "gasolina" },
-  diesel_s10: { rotulo: "Diesel S10", chave: "Diesel S10", ref: "diesel" },
-  diesel_s500: { rotulo: "Diesel S500", chave: "Diesel S500", ref: "diesel" },
-  etanol: { rotulo: "Etanol hidratado", chave: "Etanol", ref: null },
-};
-const COR: Record<string, string> = { "Diesel S10": "#2a78d6", "Diesel S500": "#2a78d6", "Gasolina C": "#eb6834", "Etanol hidratado": "#1baf7a" };
 const rs = (v: number) => "R$ " + v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export function MargemPracasView({ sim, tema }: { sim: SimData; tema: Tema }) {
-  const [rotas, setRotas] = useState<Rota[] | null>(null);
+  const [rotas, setRotas] = useState<RotaMalha[] | null>(null);
   useEffect(() => {
     fetch("/geo/rotas.json").then((r) => r.json()).then((d) => setRotas(d.rotas));
   }, []);
   const th = chartTheme(tema);
   const margemBase = useMemo(() => margemPorProduto(sim.precos), [sim.precos]);
 
-  const linhas = useMemo(() => {
-    if (!rotas) return [];
-    return rotas
-      .filter((r) => NOS[r.para]?.tipo === "praca")
-      .map((r) => {
-        const p = PRODUTO[r.produto];
-        const praca = NOS[r.para];
-        const frete = (r.km * ANTT.porKm + ANTT.fixo) / CARGA_M3;
-        const base = margemBase[p.chave] ?? 0;
-        const refUF = p.ref ? (PETROBRAS_DR[praca.uf]?.[p.ref] ?? null) : null;
-        return {
-          id: r.id,
-          praca: `${praca.nome}/${praca.uf}`,
-          origem: NOS[r.de].nome,
-          km: r.km,
-          produto: p.rotulo,
-          base,
-          frete,
-          apos: base - frete,
-          refUF,
-          refBrasil: p.ref ? PETROBRAS_BR[p.ref] : null,
-        };
-      })
-      .sort((a, b) => a.apos - b.apos);
-  }, [rotas, margemBase]);
+  const linhas = useMemo(() => (rotas ? linhasPracas(rotas, NOS, margemBase) : []), [rotas, margemBase]);
 
   const pior = linhas[0];
   const melhor = linhas.at(-1);
@@ -79,7 +32,7 @@ export function MargemPracasView({ sim, tema }: { sim: SimData; tema: Tema }) {
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 @3xl:grid-cols-4">
         <Tile rotulo="Praças atendidas" valor={String(new Set(linhas.map((l) => l.praca)).size)} nota={`${linhas.length} rotas rodoviárias reais (OSRM)`} />
         <Tile rotulo="Margem média após frete" valor={linhas.length ? rs(media) + "/m³" : "—"} nota="simulada · frete pelo piso da ANTT" />
         <Tile rotulo="Pior praça" valor={pior ? pior.praca : "—"} nota={pior ? `${rs(pior.apos)}/m³ · ${pior.km.toLocaleString("pt-BR")} km` : ""} />
@@ -98,14 +51,14 @@ export function MargemPracasView({ sim, tema }: { sim: SimData; tema: Tema }) {
               <Tooltip contentStyle={th.tip} formatter={(v) => rs(Number(v)) + "/m³"} labelFormatter={(l) => String(l)} />
               <Bar dataKey="apos" name="Margem após frete" radius={[4, 4, 0, 0]} isAnimationActive={false}>
                 {linhas.map((l) => (
-                  <Cell key={l.id} fill={COR[l.produto]} />
+                  <Cell key={l.id} fill={corProduto(l.produto, tema)} />
                 ))}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
         <div className="mt-1 flex flex-wrap gap-3 text-[10.5px] text-muted-foreground">
-          {[["Diesel", "#2a78d6"], ["Gasolina C", "#eb6834"], ["Etanol hidratado", "#1baf7a"]].map(([r, c]) => (
+          {[["Diesel", COR_PRODUTO[tema].diesel], ["Gasolina C", COR_PRODUTO[tema].gasolina], ["Etanol hidratado", COR_PRODUTO[tema].etanol]].map(([r, c]) => (
             <span key={r} className="inline-flex items-center gap-1.5">
               <span className="h-2 w-3 rounded-sm" style={{ background: c }} />
               <span className="text-foreground">{r}</span>
