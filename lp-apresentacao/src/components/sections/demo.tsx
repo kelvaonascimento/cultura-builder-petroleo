@@ -57,6 +57,10 @@ function Topo({ sim, tema, setTema, tela }: { sim: SimData; tema: Tema; setTema:
     km_vazio_pct: sim.kmVazio,
     alertas_abertos: sim.alertas,
     precos_por_base: sim.precos.map((p) => ({ produto: p.produto, base: p.base, preco_venda_rs_l: p.preco, custo_reposicao_rs_l: p.custo, preco_concorrente_rs_l: p.concorrente })),
+    tanques_por_base: sim.tanques.map((t) => ({ base: t.base, produto: t.produto, nivel_pct: Math.round(t.nivel), cobertura_dias: t.cover })),
+    carteira_vencida_rs: sim.vencidoTotal,
+    carteira_vencida_por_faixa_rs: sim.aging,
+    fila_de_cobranca_hoje: sim.cobrancas.map((c) => ({ titulo: c.id, cliente: c.posto, valor_rs: c.valor, dias_de_atraso: c.dias, situacao: c.status })),
     observacao: "todos os números deste bloco são SIMULADOS",
   };
   return (

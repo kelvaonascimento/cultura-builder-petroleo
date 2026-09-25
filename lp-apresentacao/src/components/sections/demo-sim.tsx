@@ -282,6 +282,15 @@ const EVENTOS_MAN: [string, string][] = [
 ];
 
 export const VOLUME_DIA = 7_800_000; // litros/dia do porte calibrado
+// preço inicial do concorrente por produto × base: o sorteio volta devagar para ele (não deriva sem fim)
+const CONC_INICIAL: Record<string, number> = {
+  "Diesel S10|Litoral": 5.918,
+  "Gasolina C|Litoral": 5.345,
+  "Diesel S500|Sertão": 5.861,
+  "Etanol|Planalto": 4.208,
+  "Diesel S10|Oeste": 6.012,
+  "Gasolina C|Vale": 5.29,
+};
 const TETO_CAPTURADO = 420_000;
 const TETO_NA_MESA = 360_000;
 
@@ -502,7 +511,8 @@ export function useSim(): SimData {
           // Integrada: copiloto puxa de volta para o preço sugerido
           const custo = +(p.custo + (Math.random() - 0.5) * 0.004).toFixed(3);
           const alvo = m === "integrada" ? p.preco + (p.sugerido - p.preco) * 0.2 + (Math.random() - 0.5) * 0.004 : p.preco - 0.002 - Math.random() * 0.003;
-          const dConc = (Math.random() - 0.5) * 0.012;
+          const ref = CONC_INICIAL[`${p.produto}|${p.base}`] ?? p.concorrente;
+          const dConc = (Math.random() - 0.5) * 0.012 + (ref - p.concorrente) * 0.08;
           return {
             ...p,
             custo,

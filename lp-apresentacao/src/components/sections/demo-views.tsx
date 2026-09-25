@@ -662,7 +662,7 @@ export function SuprimentoView({ sim, tema }: ViewProps) {
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <Stat label="Cobertura média" value={fmtDec(sim.tanques.reduce((a, t) => a + t.cover, 0) / sim.tanques.length, 0) + " dias"} nota="reposição antecipada pela previsão" />
+        <Stat label="Cobertura média" value={fmtDec(sim.tanques.reduce((a, t) => a + t.cover, 0) / sim.tanques.length, 0) + " dias"} nota={sim.modo === "integrada" ? "reposição antecipada pela previsão" : "reposição quando alguém percebe"} />
         <Stat label="Tanques críticos" value={String(sim.tanques.filter((t) => t.critico).length)} nota={sim.modo === "integrada" ? "reposição já acionada" : "descoberta na hora"} />
         <Stat label="Custo médio (R$/L)" value={fmtDec(sim.precos.reduce((a, p) => a + p.custo, 0) / sim.precos.length, 3)} delta="▲ +0,9% em 14 dias" tom="ruim" nota="custo de reposição nas bases" />
         <Stat label="Compras em aberto" value="3 pedidos" nota="refinaria, importação e duto" />
