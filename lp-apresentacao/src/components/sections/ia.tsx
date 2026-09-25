@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { CompanyLogo } from "@/components/logo";
 import { Reveal } from "@/components/motion";
-import { casosIa, matrizMelhorias } from "@/lib/data";
+import { casosIa, casosIaGlobais, matrizMelhorias } from "@/lib/data";
 
 const CardGray = ({
   children,
@@ -35,7 +35,8 @@ export function IA() {
           <p className="text-sm font-medium text-[#6e6e73]">IA no setor</p>
           <h2 className="mt-3 text-4xl font-semibold tracking-tight text-[#1d1d1f] md:text-6xl">IA não é promessa. É P&amp;L.</h2>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[#6e6e73]">
-            Casos brasileiros com resultado divulgado — cada um com o veículo e a data. Só entra o que tem fonte identificada.
+            Casos com resultado divulgado — no Brasil e lá fora — cada um com o veículo e a data. Só entra o que tem fonte
+            primária, com o número exatamente como foi publicado.
           </p>
         </Reveal>
 
@@ -49,6 +50,7 @@ export function IA() {
                 </p>
                 <p className="mt-4 text-sm leading-relaxed text-[#6e6e73]">{c.oQueFez}</p>
                 <p className="mt-3 text-xl font-semibold leading-snug tracking-tight text-[#1d1d1f]">{c.resultado}</p>
+                {c.nota && <p className="mt-2 text-xs text-[#86868b]">{c.nota}</p>}
                 <a href={c.fonte.url} target="_blank" rel="noreferrer" className="mt-4 block text-[11px] text-[#86868b] underline-offset-2 hover:underline">
                   Fonte: {c.fonte.rotulo} ↗
                 </a>
@@ -56,9 +58,33 @@ export function IA() {
             </Reveal>
           ))}
         </div>
+
+        <Reveal className="mt-16">
+          <p className="text-sm font-medium text-[#6e6e73]">Lá fora</p>
+          <h3 className="mt-2 text-2xl font-semibold tracking-tight text-[#1d1d1f] md:text-3xl">As maiores do mundo já medem o retorno.</h3>
+        </Reveal>
+        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {casosIaGlobais.map((c, i) => (
+            <Reveal key={c.empresa} delay={i * 60}>
+              <div className="flex h-full flex-col rounded-3xl bg-[#f5f5f7] p-6">
+                <p className="flex items-center gap-2.5 text-sm font-semibold text-[#1d1d1f]">
+                  <CompanyLogo name={c.empresa} size={18} />
+                  {c.empresa}
+                </p>
+                <p className="mt-3 text-[13px] leading-relaxed text-[#6e6e73]">{c.oQueFez}</p>
+                <p className="mt-2 text-base font-semibold leading-snug tracking-tight text-[#1d1d1f]">{c.resultado}</p>
+                {c.nota && <p className="mt-1.5 text-[11px] text-[#86868b]">{c.nota}</p>}
+                <a href={c.fonte.url} target="_blank" rel="noreferrer" className="mt-auto block pt-4 text-[11px] text-[#86868b] underline-offset-2 hover:underline">
+                  Fonte: {c.fonte.rotulo} ↗
+                </a>
+              </div>
+            </Reveal>
+          ))}
+        </div>
         <p className="mt-6 text-xs leading-relaxed text-[#86868b]">
-          Resultados como divulgados pelas empresas à imprensa ou em canal oficial. Casos que circulam sem fonte primária — inclusive
-          números globais repetidos em blogs e materiais de fornecedores — ficaram de fora.
+          Resultados como divulgados pelas empresas à imprensa ou em canal oficial. Ficaram de fora números que circulam sem fonte
+          primária e os que não são de IA — como os cortes estruturais de custo da ExxonMobil desde 2019, citados com frequência
+          como ganho de IA.
         </p>
       </div>
     </section>

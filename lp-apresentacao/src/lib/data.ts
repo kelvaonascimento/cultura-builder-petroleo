@@ -38,32 +38,80 @@ export const fontesPrimarias: { label: string; url: string }[] = [
   { label: "OpenStreetMap / OSRM — rotas rodoviárias", url: "https://www.openstreetmap.org/copyright" },
 ];
 
-// Casos de IA no setor: só entram com fonte identificada (veículo/canal oficial e data).
-// Casos que circulam sem fonte primária (inclusive globais) ficaram de fora até serem confirmados.
-export const casosIa: { empresa: string; oQueFez: string; resultado: string; fonte: Ref }[] = [
+// Casos de IA no setor: só entram com fonte identificada (veículo/canal oficial e data), com o número como publicado.
+// Conferidos em 24/09/2026 com a matéria ou o comunicado aberto (não a busca da manchete).
+export type CasoIa = { empresa: string; oQueFez: string; resultado: string; nota?: string; fonte: Ref };
+
+export const casosIa: CasoIa[] = [
   {
     empresa: "Vibra",
-    oQueFez: "IA na logística para prever demanda e dimensionar estoques.",
-    resultado: "R$ 900 milhões a menos parados em estoque.",
-    fonte: { rotulo: "VEJA, 05/08/2026", url: "https://news.google.com/search?q=IA%20libera%20R%24%20900%20milh%C3%B5es%20que%20a%20Vibra%20mantinha%20em%20estoques&hl=pt-BR" },
+    oQueFez: "IA para prever a demanda e dimensionar os estoques de combustível.",
+    resultado: "R$ 900 milhões liberados de estoque.",
+    nota: "Estimativa da própria Vibra.",
+    fonte: { rotulo: "VEJA, 05/08/2026", url: "https://veja.abril.com.br/coluna/radar-economico/ia-libera-r-900-milhoes-que-a-vibra-mantinha-em-estoques/" },
   },
   {
     empresa: "Raízen",
-    oQueFez: "IA para otimizar operações, com foco em transporte.",
-    resultado: "Redução de custos de R$ 230 milhões.",
-    fonte: { rotulo: "Estadão, 08/04/2024", url: "https://news.google.com/search?q=Ra%C3%ADzen%20reduz%20custos%20em%20R%24%20230%20milh%C3%B5es%20intelig%C3%AAncia%20artificial&hl=pt-BR" },
+    oQueFez: "IA para otimizar o transporte de combustíveis, dentro de um programa de digitalização que incluiu caminhões novos.",
+    resultado: "R$ 230 milhões de redução de custos desde 2021.",
+    nota: "Valor do programa inteiro, não só da IA.",
+    fonte: { rotulo: "Estadão, 08/04/2024", url: "https://www.estadao.com.br/economia/governanca/raizen-reduz-custos-otimizando-operacoes-inteligencia-artificial/" },
   },
   {
     empresa: "Petrobras",
-    oQueFez: "ChatPetrobras: ferramenta de IA generativa para uso interno.",
-    resultado: "Disponível para mais de 100 mil trabalhadores.",
-    fonte: { rotulo: "Agência Petrobras, 05/12/2023", url: "https://news.google.com/search?q=Petrobras%20cria%20ferramenta%20com%20Intelig%C3%AAncia%20Artificial%20Generativa%20para%20apoiar%20mais%20de%20100%20mil%20trabalhadores&hl=pt-BR" },
+    oQueFez: "ChatPetrobras: IA generativa num portal interno da empresa.",
+    resultado: "Disponível para 110 mil trabalhadores, entre empregados e prestadores.",
+    nota: "Número de acesso à ferramenta, não de uso medido.",
+    fonte: { rotulo: "Agência Petrobras, 05/12/2023", url: "https://agencia.petrobras.com.br/w/petrobras-cria-ferramenta-com-inteligencia-artificial-generativa-para-apoiar-mais-de-100-mil-trabalhadores" },
   },
   {
     empresa: "Petrobras",
-    oQueFez: "Machine learning para prever receitas.",
-    resultado: "Ampliação do uso de IA em finanças e planejamento.",
-    fonte: { rotulo: "Agência eixos, 07/11/2024", url: "https://news.google.com/search?q=Petrobras%20amplia%20uso%20da%20tecnologia%20e%20prev%C3%AA%20receitas%20com%20machine%20learning&hl=pt-BR" },
+    oQueFez: "Machine learning para prever receitas de vendas.",
+    resultado: "Estimativas de vendas 51% mais precisas.",
+    fonte: { rotulo: "Agência eixos, 07/11/2024", url: "https://eixos.com.br/petroleo-e-gas/inteligencia-artificial-petrobras-amplia-uso-da-tecnologia-e-preve-receitas-com-machine-learning/" },
+  },
+];
+
+// Casos internacionais: comunicado da própria empresa (ou do parceiro, citando a empresa) ou agência de notícias de peso
+export const casosIaGlobais: CasoIa[] = [
+  {
+    empresa: "Saudi Aramco",
+    oQueFez: "IA, soluções digitais e outras tecnologias aplicadas em toda a operação.",
+    resultado: "US$ 5,3 bilhões de valor realizado em 2025; US$ 11,3 bilhões desde 2023.",
+    nota: "Métrica da empresa que soma IA, digital e outras tecnologias.",
+    fonte: { rotulo: "Aramco, 10/03/2026", url: "https://www.aramco.com/en/news-media/news/2026/fourth-quarter-and-full-year-press-release" },
+  },
+  {
+    empresa: "ADNOC",
+    oQueFez: "Mais de 30 ferramentas de IA, do campo às decisões corporativas.",
+    resultado: "US$ 500 milhões de valor adicional em 2023.",
+    fonte: { rotulo: "Reuters, 05/03/2024", url: "https://www.reuters.com/technology/adnoc-says-ai-added-500-mln-extra-value-2023-2024-03-05/" },
+  },
+  {
+    empresa: "ExxonMobil",
+    oQueFez: "Deep learning e supercomputação para interpretar os dados sísmicos da Guiana.",
+    resultado: "Interpretação sísmica em dias, em vez de meses.",
+    fonte: { rotulo: "Reuters, 05/05/2026", url: "https://www.reuters.com/business/energy/exxon-using-ai-faster-analysis-guyanas-oil-fields-vp-exploration-says-2026-05-05/" },
+  },
+  {
+    empresa: "BP",
+    oQueFez: "IA para desenhar a trajetória de poços, da superfície ao reservatório.",
+    resultado: "Centenas de trajetórias comparadas em menos de um dia; antes, semanas ou meses.",
+    fonte: { rotulo: "bp, 15/10/2025", url: "https://www.bp.com/press-and-publications/energy-in-focus-magazine/how-ai-is-shaping-bp-operations" },
+  },
+  {
+    empresa: "Shell",
+    oQueFez: "Manutenção preditiva com IA em ativos no mundo todo, desde 2018.",
+    resultado: "Mais de 13.000 equipamentos monitorados.",
+    nota: "Número de escala, não de retorno financeiro.",
+    fonte: { rotulo: "C3 AI, 04/06/2026", url: "https://c3.ai/news/c3-ai-and-shell-expand-collaboration-scaling-reliability-ai-deployment-across-global-asset-operations" },
+  },
+  {
+    empresa: "TotalEnergies",
+    oQueFez: "IA analisa dados de equipamentos para antecipar falhas e planejar a manutenção.",
+    resultado: "Quase 3.000 equipamentos monitorados.",
+    nota: "Número de escala, não de retorno financeiro.",
+    fonte: { rotulo: "TotalEnergies, 18/06/2026", url: "https://totalenergies.com/newsroom/viva-tech-la-data-lia-au-service-de-la-strategie-de-transition-de-totalenergies-478376/?lang=eng" },
   },
 ];
 
