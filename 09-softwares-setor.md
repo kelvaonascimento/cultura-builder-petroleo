@@ -1,6 +1,8 @@
 # 09 · Catálogo de Softwares do Setor (com logos)
 
-> 44 ferramentas mapeadas nos 7 setores da cadeia de combustíveis (doc 05) + camada transversal de dados/IA.
+> Revisado em 24/09/2026: números conferidos em fonte oficial. Os dados usados na apresentação estão em lp-apresentacao/src/lib/dados-oficiais.ts. Itens marcados como (não confirmado) não devem ser usados sem nova checagem.
+
+> 45 ferramentas mapeadas nos 7 setores da cadeia de combustíveis (doc 05) + camada transversal de dados/IA (as tabelas abaixo listam 45; o manifesto em /tmp/softwares.json tem 44 entradas).
 > Logos em `lp-apresentacao/public/logos/softwares/` — prontos para uso na LP e nos materiais de venda.
 
 **Metodologia:** para cada setor da cadeia (05-cadeia-processos.md), listamos os softwares dominantes no Brasil. Logos obtidos do Simple Icons (SVG oficial, monocromático, quando disponível) ou do favicon oficial do domínio (via serviço Google S2). Catálogo completo: 45 ferramentas, todas com logo. WebPosto em 36px (único de baixa resolução) — trocar por press kit HD no design final.
@@ -89,7 +91,7 @@
 | **GitHub Copilot** | `/logos/softwares/github-copilot.svg` | global | Copilot de código: acelera times de TI internos | *(ver mapa de agentes por software abaixo)* |
 | **n8n** | `/logos/softwares/n8n.svg` | global | Automação de workflows open-source para agentes | *(ver mapa de agentes por software abaixo)* |
 | **Make** | `/logos/softwares/make.svg` | global | Automação no-code de integrações | *(ver mapa de agentes por software abaixo)* |
-| **Zapier** | `/logos/softwares/zapier.svg` | global | Integração de 7.000+ apps com agentes de IA | *(ver mapa de agentes por software abaixo)* |
+| **Zapier** | `/logos/softwares/zapier.svg` | global | Integração de milhares de apps com agentes de IA ("7.000+": não confirmado) | *(ver mapa de agentes por software abaixo)* |
 | **Cursor** | `/logos/softwares/cursor.svg` | global | IDE com IA para desenvolvimento acelerado | *(ver mapa de agentes por software abaixo)* |
 
 ---

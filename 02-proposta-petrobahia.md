@@ -1,4 +1,9 @@
 # Proposta Comercial — PETROBAHIA
+
+> Revisado em 24/09/2026: números conferidos em fonte oficial. Os dados usados na apresentação estão em lp-apresentacao/src/lib/dados-oficiais.ts. Itens marcados como (não confirmado) não devem ser usados sem nova checagem.
+>
+> **Rascunho interno.** Este arquivo não é uma proposta enviada: não existe proposta comercial para a Petrobahia.
+
 ## Digitalização e IA para distribuição de combustíveis
 ### Cultura Builder
 
@@ -8,12 +13,17 @@
 
 A Petrobras economizou **US$ 120 milhões em 3 semanas** com automação fiscal e IA generativa,
 arquivou impostos em 3 dias pela primeira vez em 15 anos e projetou **mais de US$ 1 bilhão**
-de economia adicional. A Shell economiza **US$ 2 bilhões por ano** com manutenção preditiva.
-A BP aumentou a produção em **4%** com IA.
+de economia adicional (não confirmado: números do release do fornecedor Automation Anywhere, de
+07/03/2024, não da Petrobras; o US$ 1 bilhão é expectativa, não resultado). A Shell economiza
+**US$ 2 bilhões por ano** com manutenção preditiva (não confirmado: o release da C3 AI de 04/06/2026
+fala em "centenas de milhões de dólares"). A BP aumentou a produção em **4%** com IA (não confirmado).
+
+Casos confirmados que podem substituir os de cima: a Vibra reduziu em R$ 900 milhões o estoque com IA
+(VEJA, 05/08/2026); a Raízen reduziu custos em R$ 230 milhões com IA (Estadão, 08/04/2024).
 
 Essas ferramentas existem há anos — mas ficaram presas nas grandes. As distribuidoras
 regionais, que vendem margem apertada e capital de giro caro, operam com telefone, planilha
-e WhatsApp.
+e WhatsApp (hipótese, não confirmado).
 
 **A Cultura Builder entrega a versão regional dessas tecnologias em semanas, não em anos.**
 
@@ -23,8 +33,8 @@ Esta proposta cobre 3 frentes integradas para a PETROBAHIA:
 2. **Cérebro Comercial** — IA para precificação, previsão de demanda e prospecção
 3. **Conformidade Sem Dor** — automação fiscal multi-estado + segurança (OWASP)
 
-Investimento total sugerido: **R$ 75.000 a R$ 125.000** (3 meses) + retainer opcional.
-ROI esperado: **10x a 40x** (detalhado na seção 7).
+Investimento total sugerido: **R$ 75.000,00 a R$ 125.000,00** (3 meses) + retainer opcional.
+ROI esperado: **10x a 40x** (estimativa interna, não confirmado; detalhado na seção 7).
 
 ---
 
@@ -32,19 +42,20 @@ ROI esperado: **10x a 40x** (detalhado na seção 7).
 
 | Fato | Fonte |
 |---|---|
-| Fundada em 1996 em Salvador-BA, uma das primeiras regionais pós-abertura do mercado | petrobahia.com.br |
-| 130+ postos bandeirados em NE, N, CO e SE | Movimento Econômico, 2022 |
-| 18 bases: 6 próprias (Balsas/MA, Itabuna/BA, Juazeiro/BA, LEM/BA, Pojuca/BA, São Francisco do Conde/BA) + 12 filiais | petrobahia.com.br |
-| Trading próprio em Suape/PE (capital R$ 68 mi, CNAE 46.81-8/01) | Receita Federal |
+| CNPJ aberto em 02/04/1996, em Salvador-BA. "Uma das primeiras regionais pós-abertura do mercado": não confirmado | Receita Federal; petrobahia.com.br |
+| 154 postos com a bandeira em 10 UFs de 4 regiões (o "130+" era de 2022) | ANP, cadastro de 24/09/2026 |
+| 9ª distribuidora do país em volume em 2025: 2.030.040 m³ (1,48%), +8,3% sobre 2024 | ANP, vendas por distribuidora |
+| 5 bases próprias com 28.786 m³ (Luís Eduardo Magalhães/BA, São Francisco do Conde/BA, Balsas/MA, Itabuna/BA, Juazeiro/BA) e terminais de terceiros em 20 municípios. O "18 bases: 6 próprias (com Pojuca/BA) + 12 filiais" não se sustenta | ANP, abr/2026 |
+| Trading próprio em Suape/PE (CNAE 46.81-8/01; capital social): não confirmado | Receita Federal (via agregador) |
 | Portfólio: gasolina, etanol, diesel, Diesel Clean BAC, ODM, GNV/GNL, linha Impulse | petrobahia.com.br |
-| R$ 1 bi em usina de etanol de milho (Correntina/Jaborandi-BA) — 1ª da Bahia | NovaCana, 2024 |
-| R$ 50 mi em gás para Sergipe + liquefação com Bahia Gás | imprensa |
+| Usina de etanol de milho em Correntina/Jaborandi-BA, "1ª da Bahia": cerca de R$ 1 bilhão (não confirmado) | NovaCana, 01/11/2024 |
+| Investimento em gás para Sergipe + liquefação com Bahia Gás: não confirmado | imprensa (sem fonte específica) |
 | Diferenciais declarados: crédito pré-aprovado, seguro de carga, garantia de suprimento | petrobahia.com.br |
 
 ### Lacunas identificadas (hipóteses a validar no diagnóstico)
 - Funil de captação de postos "Seja um Bandeirado" é offline (telefone/WhatsApp) — sem LP, sem SEO, sem rastreio
 - Precificação por base/região não é sistêmica (decisão comercial manual)
-- Esteira fiscal multi-estado (BA, MA, PE, PI, GO, MT, MG, TO, AL, PB, SE) consome time contábil
+- Esteira fiscal multi-estado (BA, MA, PE, PI, GO, MT, MG, TO, AL, PB, SE) consome time contábil (a ANP registra postos da bandeira em 10 UFs)
 - Sem portal B2B: revenda liga ou chama no WhatsApp para cotação e pedido
 
 ---
@@ -52,29 +63,37 @@ ROI esperado: **10x a 40x** (detalhado na seção 7).
 ## 3. As 3 dores que atacamos (com prova de mercado)
 
 ### Dor 1 — Fiscal (a dor nº 1 do setor)
-150 páginas de regras fiscais por período só na Petrobras. ICMS diferente por estado,
-PIS/Cofins, base de cálculo com frete e encargos, transações interestaduais, isenções
-regionais. A partir de 2026, a Reforma Tributária (IBS/CBS) obriga a reescrever toda
-a esteira fiscal de todas as distribuidoras do país.
+O ICMS da gasolina e do diesel é monofásico, por litro e igual em todo o país: R$ 1,57/L e
+R$ 1,17/L desde 01/01/2026 (Conv. ICMS 112/25 e 113/25). Seguem PIS/Cofins, subvenções,
+transações interestaduais e isenções regionais. A CBS por litro substitui PIS/Cofins nos
+combustíveis em 01/01/2027 (IBS de 0,1% em 2027–28; IBS por litro a partir de 2029; transição
+até 2033 — LC 214/2025): a esteira fiscal de todas as distribuidoras do país terá de ser refeita.
+("150 páginas de regras fiscais por período só na Petrobras": não confirmado.)
 
-**Prova:** Petrobras + Automation Anywhere + IA generativa = US$ 120 mi economizados
-em 3 semanas; impostos arquivados em 3 dias (primeira vez em 15 anos); +40% de eficiência.
+**Prova (não confirmado):** Petrobras + Automation Anywhere + IA generativa = US$ 120 milhões economizados
+em 3 semanas e impostos arquivados em 3 dias (primeira vez em 15 anos) — números do release do
+fornecedor (07/03/2024), não da Petrobras. "+40% de eficiência": não confirmado.
 
 ### Dor 2 — Margem e capital de giro
-Receita oscila com Brent + câmbio (Petrobras: R$ 9 bi/semana de flutuação). Revenda paga
-30-45 dias, ICMS por antecipação, Selic alta. Raízen — 2ª maior distribuidora do país —
-entrou em recuperação extrajudicial com R$ 65,1 bi de dívida.
+Receita oscila com Brent + câmbio. (Correção: os cerca de R$ 9 bilhões por semana citados pela
+Agência eixos, 07/11/2024, são a receita semanal média da Petrobras, não flutuação.) Revenda paga
+30-45 dias (não confirmado), tributo embutido no custo de compra, Selic alta. A Raízen — 3ª
+distribuidora do país em volume em 2025 (ANP) — pediu recuperação extrajudicial em 11/03/2026,
+com dívidas de aproximadamente R$ 65,1 bilhões (valor aproximado segundo o próprio fato relevante);
+o plano foi homologado em 30/07/2026.
 
-**Prova:** ML de previsão de receita da Petrobras melhorou a precisão em 51% e reduziu
-o erro de previsão em ~R$ 400 mi sobre uma base semanal de R$ 9 bi.
+**Prova:** o modelo de machine learning da Petrobras melhorou em 51% a precisão das estimativas de
+vendas (Agência eixos, 07/11/2024). "Segundo fontes", reduziria o erro médio em cerca de R$ 400 milhões
+numa receita semanal média de cerca de R$ 9 bilhões — é redução do erro de previsão, não economia
+(não confirmado).
 
 ### Dor 3 — Crescimento da rede
-49,4% dos 10.332 postos do Nordeste são de bandeira branca. A disputa por esses postos é
-concentrada em força comercial e preço. Quem digitaliza o funil (LP + prospecção IA + portal
-com crédito) captura mais rápido que o concorrente.
+61,61% dos 12.950 postos do Nordeste (7.978) são de bandeira branca (ANP, cadastro de 24/09/2026).
+A disputa por esses postos é concentrada em força comercial e preço. Quem digitaliza o funil
+(LP + prospecção IA + portal com crédito) captura mais rápido que o concorrente.
 
 **Prova:** distribuidoras com funil digital captam e onboarding revendas a um custo por
-posto 3-5x menor que o funil telefônico (benchmark B2B de mercado).
+posto 3-5x menor que o funil telefônico (benchmark B2B de mercado; não confirmado).
 
 ---
 
@@ -102,7 +121,7 @@ posto 3-5x menor que o funil telefônico (benchmark B2B de mercado).
 ### Pacote C — "Conformidade Sem Dor" (fiscal + segurança)
 | Item | Detalhe |
 |---|---|
-| Automação de apuração multi-estado | Pipeline com IA para ICMS/PIS/Cofins por base; prepara o terreno para IBS/CBS |
+| Automação de apuração multi-estado | Pipeline com IA para ICMS/PIS/Cofins por base; prepara o terreno para CBS/IBS |
 | Hardening de segurança | Checklist OWASP no portal (pagamentos, dados de revendas), trilha de auditoria |
 | Copiloto de compliance | RAG sobre legislação ANP + tributária; responde dúvidas do time com citação da fonte |
 | Prazo | 4-6 semanas |
@@ -129,12 +148,14 @@ posto 3-5x menor que o funil telefônico (benchmark B2B de mercado).
 
 | Player | Resultado | Relevância para a PETROBAHIA |
 |---|---|---|
-| Petrobras | US$ 120 mi economizados em 3 semanas (fiscal + IA) | Mesma esteira fiscal, escala menor |
-| Petrobras | +51% de precisão em previsão de receita (~R$ 400 mi de erro evitado) | Preço e caixa por base |
-| Shell | US$ 2 bi/ano em manutenção preditiva | Bases e frota própria |
-| BP | +4% produção; -90% tempo de interpretação sísmica | Prova de maturidade da IA no setor |
-| Chevron | 12 acidentes maiores evitados, US$ 12 mi | Segurança operacional |
-| ExxonMobil | US$ 9,7 bi de economia estrutural com IA em trading/refino | Comercial e precificação |
+| Vibra | R$ 900 milhões a menos em estoque com IA (VEJA, 05/08/2026) | Estoque e capital de giro por base |
+| Raízen | R$ 230 milhões de redução de custos com IA (Estadão, 08/04/2024) | Logística e transporte |
+| Petrobras | US$ 120 milhões economizados em 3 semanas (fiscal + IA) — número do fornecedor Automation Anywhere (não confirmado) | Mesma esteira fiscal, escala menor |
+| Petrobras | +51% de precisão na previsão de vendas (Agência eixos, 07/11/2024); "cerca de R$ 400 milhões de redução do erro médio" (não confirmado; não é economia) | Caixa por base |
+| Shell | "US$ 2 bilhões/ano em manutenção preditiva" (não confirmado); o release da C3 AI (04/06/2026) fala em mais de 13.000 equipamentos e "centenas de milhões de dólares" | Bases e frota própria |
+| BP | +4% produção; -90% tempo de interpretação sísmica (não confirmado) | Prova de maturidade da IA no setor |
+| Chevron | 12 acidentes maiores evitados, US$ 12 milhões (não confirmado) | Segurança operacional |
+| ExxonMobil | Não é caso de IA: os cerca de US$ 9,7 bilhões são economias estruturais de custo da empresa inteira desde 2019 | Não usar |
 
 ---
 
@@ -142,20 +163,20 @@ posto 3-5x menor que o funil telefônico (benchmark B2B de mercado).
 
 | Premissa | Valor |
 |---|---|
-| Faturamento anual estimado da rede (130 postos) | R$ 1,5 bi - R$ 3 bi |
-| Melhoria de margem com precificação inteligente | +0,5% a +1,5% |
-| Ganhos em margem/ano | R$ 7,5 mi - R$ 45 mi |
-| Economia fiscal (automatização de apuração, reduz horas contábeis) | R$ 300 mil - R$ 1 mi/ano |
-| Postos captados via funil digital (vs. telefone) | +10 a +30 postos/ano |
-| Investimento total (3 pacotes) | R$ 75 mil - R$ 125 mil |
-| **Payback estimado** | **1 a 3 meses** |
+| Faturamento anual estimado da rede (premissa de 130 postos; a ANP registra 154 com a bandeira em 24/09/2026) | R$ 1.500.000.000,00 a R$ 3.000.000.000,00 (estimativa interna, não confirmado) |
+| Melhoria de margem com precificação inteligente | +0,5% a +1,5% (estimativa interna, não confirmado) |
+| Ganhos em margem/ano | R$ 7.500.000,00 a R$ 45.000.000,00 (estimativa interna, não confirmado) |
+| Economia fiscal (automatização de apuração, reduz horas contábeis) | R$ 300.000,00 a R$ 1.000.000,00 por ano (estimativa interna, não confirmado) |
+| Postos captados via funil digital (vs. telefone) | +10 a +30 postos/ano (estimativa interna, não confirmado) |
+| Investimento total (3 pacotes) | R$ 75.000,00 a R$ 125.000,00 |
+| **Payback estimado** | **1 a 3 meses** (estimativa interna, não confirmado) |
 
 ---
 
 ## 8. Por que a Cultura Builder (e não a consultoria)
 
-- **Velocidade:** entregas em semanas; consultoria tradicional exige 6-12 meses
-- **Custo:** 5-10x menor que big consultorias
+- **Velocidade:** entregas em semanas; consultoria tradicional exige 6-12 meses (não confirmado)
+- **Custo:** 5-10x menor que big consultorias (estimativa interna, não confirmado)
 - **IA nativa:** engenharia de prompts, RAG e avaliação de LLM são competência de casa, não subcontratada
 - **Fim a fim:** design, desenvolvimento, conteúdo, SEO, segurança e code review internos
 - **Stack comprovada:** Next.js, PostgreSQL, Vercel, padrões OWASP

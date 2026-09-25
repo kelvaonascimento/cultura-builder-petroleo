@@ -1,25 +1,27 @@
 # 08 · Censo Nacional de Distribuidoras de Combustíveis (RenovaBio 2025)
 
+> Revisado em 24/09/2026: números conferidos em fonte oficial. Os dados usados na apresentação estão em lp-apresentacao/src/lib/dados-oficiais.ts. Itens marcados como (não confirmado) não devem ser usados sem nova checagem.
+
 > Fonte primária: ANP — Relatório de Cumprimento de Metas de CBIO, sheet "Metas 2025-Publicação" (`fontes/anp-relatorio-cumprimento-meta-2025.xlsx`).
 > O arquivo tem 167 linhas; 163 são distribuidoras — as demais são a linha de total e 3 notas de rodapé. **Censo real: 163 empresas.**
 
-## Por que a meta CBIO é o melhor termômetro de porte
+## A meta CBIO como termômetro de porte (com limites)
 
-A meta de aposentação de CBIOs de cada distribuidora é **proporcional à sua participação no volume de diesel vendido** (e de demais fósseis) no ano. Ou seja: o ranking de metas é, na prática, **o ranking de volume distribuído** — sem depender de receita confidencial ou de bases fechadas. É a métrica mais próxima de 'quem realmente move os litros no Brasil'.
+Segundo a ANP (31/03/2026), a meta de aposentação de CBIOs de cada distribuidora é calculada sobre a sua **participação na comercialização de combustíveis fósseis** (Res. ANP 791/2019, art. 6º) e pode ser reduzida por contratos de longo prazo de compra de biocombustível (art. 6º-A). Não é "volume de diesel vendido" nem volume real distribuído. O ranking de metas serve como indicador indireto de porte; para volume, use as vendas da ANP (em 2025: Vibra 29.263.944 m³, Ipiranga 23.310.099 m³, Raízen 22.262.678 m³ … PETROBAHIA 2.030.040 m³, 9ª — ver lp-apresentacao/src/lib/dados-oficiais.ts).
 
 ## Panorama executivo
 
 | Indicador | Valor |
 |---|---|
 | Distribuidoras mapeadas | **163** |
-| Metas somadas (CBIOs 2025) | **46.126.199** (≈ R$ 1,1–1,4 bi em aposentações) |
-| Concentração | Top 5 = **56,6%** · Top 10 = 66,5% · Top 25 = 79,7% |
-| Conformidade | **39 fora de 100%** (16 atrasadas + 19 zeradas + 4 sem meta/definida) |
-| PETROBAHIA | **Rank 11** — 636.760 CBIOs (1,38% do nacional), 100% cumprida |
+| Total a aposentar até 31/12/2025 (metas + saldo de 2024) | **46.126.199** CBIOs (valor em reais: não confirmado — depende do preço do CBIO) |
+| Concentração da meta | Top 5 = **56,6%** · Top 10 = 66,5% · Top 25 = 79,7% |
+| Conformidade | **122 com 100%**; **37 abaixo de 100%** (18 parciais + 19 com 0%); **4 sem percentual por liminar** (sub judice) |
+| PETROBAHIA | **Rank 11** pela meta — 636.760 CBIOs (1,38% da meta nacional), 100% cumprida |
 
 ## Estrutura de tiers
 
-| Tier | Critério (meta CBIO 2025) | Empresas | % do volume | Leitura estratégica |
+| Tier | Critério (meta CBIO 2025) | Empresas | % da meta nacional | Leitura estratégica |
 |---|---|---|---|---|
 | **G1** | ≥ 2.000.000 CBIOs | 5 | 56,6% | Jogos digitais, IA de trading e otimização de logística em escala |
 | **G2** | 500 mil – 2 mi | 7 | 12,7% | Os "vencedores regionais" — exatamente o nicho PETROBAHIA |
@@ -30,7 +32,7 @@ A meta de aposentação de CBIOs de cada distribuidora é **proporcional à sua 
 
 ## G1 · Gigantes nacionais (≥ 2.000.000 CBIOs)
 
-**5 empresas · 26.090.092 CBIOs · 56,6% do volume nacional**
+**5 empresas · 26.090.092 CBIOs · 56,6% da meta nacional**
 
 | # | Distribuidora | Meta CBIO 2025 | Cumprimento | Observações ANP |
 |---|---|---:|---:|---|
@@ -42,7 +44,7 @@ A meta de aposentação de CBIOs de cada distribuidora é **proporcional à sua 
 
 ## G2 · Grandes (500 mil – 2 mi CBIOs)
 
-**7 empresas · 5.849.097 CBIOs · 12,7% do volume nacional**
+**7 empresas · 5.849.097 CBIOs · 12,7% da meta nacional**
 
 | # | Distribuidora | Meta CBIO 2025 | Cumprimento | Observações ANP |
 |---|---|---:|---:|---|
@@ -56,7 +58,7 @@ A meta de aposentação de CBIOs de cada distribuidora é **proporcional à sua 
 
 ## G3 · Médias regionais (100 – 500 mil CBIOs)
 
-**50 empresas · 11.277.045 CBIOs · 24,4% do volume nacional**
+**50 empresas · 11.277.045 CBIOs · 24,4% da meta nacional**
 
 | # | Distribuidora | Meta CBIO 2025 | Cumprimento | Observações ANP |
 |---|---|---:|---:|---|
@@ -67,7 +69,7 @@ A meta de aposentação de CBIOs de cada distribuidora é **proporcional à sua 
 | 17 | Potencial Petróleo Ltda | 401.252 | 100&nbsp;% |  |
 | 18 | Flexpetro Distribuidora De Derivados De Petróleo S.A. | 394.417 | 100&nbsp;% |  |
 | 19 | Tobras Distribuidora De Combustíveis Ltda. | 364.316 | 100&nbsp;% |  |
-| 20 | Imperio Comercio De Petroleo S/A. | 347.588 | 3&nbsp;% |  |
+| 20 | Imperio Comercio De Petroleo S/A. | 347.588 | 0,03&nbsp;% |  |
 | 21 | Raizen Mime Combustiveis S/A. | 334.851 | 100&nbsp;% |  |
 | 22 | Petrox Distribuidora Ltda. | 307.282 | 100&nbsp;% |  |
 | 23 | Duvale Distribuidora De Petróleo E Álcool Ltda. | 293.412 | 0&nbsp;% |  |
@@ -84,7 +86,7 @@ A meta de aposentação de CBIOs de cada distribuidora é **proporcional à sua 
 | 34 | Imperial Distribuidora De Petróleo Ltda. | 205.015 | 100&nbsp;% |  |
 | 35 | Distribuidora De Combustíveis Saara S.A. | 199.726 | — | Sub judice |
 | 36 | Dislub Combustiveis S.A. | 196.975 | 100&nbsp;% |  |
-| 37 | Art Petro Distribuidora De Combustíveis Ltda. | 192.751 | 100&nbsp;% | Aposentou 23.759 CBIOs até 31/12/2025 referente a metas de anos anteriores. Apos |
+| 37 | Art Petro Distribuidora De Combustíveis Ltda. | 192.751 | 100&nbsp;% | Aposentou 23.759 CBIOs até 31/12/2025 referente a metas de anos anteriores. Aposentou 111.873 em fevereiro de 2026 |
 | 38 | Stang Distribuidora De Petróleo Ltda. | 191.927 | 100&nbsp;% |  |
 | 39 | Gp Distribuidora De Combustíveis S/A. | 191.125 | 100&nbsp;% |  |
 | 40 | D`Mais Distribuidora De Petróleo Ltda. | 186.777 | 100&nbsp;% |  |
@@ -113,13 +115,13 @@ A meta de aposentação de CBIOs de cada distribuidora é **proporcional à sua 
 
 ## G4 · Locais e emergentes (< 100 mil CBIOs)
 
-**101 empresas · 2.909.965 CBIOs · 6,3% do volume nacional**
+**101 empresas · 2.909.965 CBIOs · 6,3% da meta nacional**
 
 | # | Distribuidora | Meta CBIO 2025 | Cumprimento | Observações ANP |
 |---|---|---:|---:|---|
 | 63 | Hora Distribuidora De Petróleo Ltda. | 95.963 | 100&nbsp;% |  |
 | 64 | Nimo Ernergia Distribuidora E Comercio De Combustiveis Limitada | 95.631 | 100&nbsp;% |  |
-| 65 | Petroworld Combustiveis S/A | 94.830 | 520&nbsp;% | Sub judice |
+| 65 | Petroworld Combustiveis S/A | 94.830 | 5,2&nbsp;% | Sub judice |
 | 66 | Danpetro Distribuidora De Petróleo S.A. | 93.673 | 100&nbsp;% |  |
 | 67 | Sada Combustíveis Ltda | 93.027 | 100&nbsp;% |  |
 | 68 | Soll Distribuidora De Petróleo Ltda | 91.287 | 100&nbsp;% |  |
@@ -189,7 +191,7 @@ A meta de aposentação de CBIOs de cada distribuidora é **proporcional à sua 
 | 132 | Petrosalvador Distribuidora De Combustíveis Ltda. | 4.805 | 0&nbsp;% |  |
 | 133 | Acai Petroleo Mato Grosso Ltda | 4.269 | 100&nbsp;% |  |
 | 134 | Petronol Distribuidora De Petróleo E Etanol Ltda. | 2.502 | 100&nbsp;% |  |
-| 135 | Minuano Petróleo Ltda. | 1.587 | 958&nbsp;% |  |
+| 135 | Minuano Petróleo Ltda. | 1.587 | 9,58&nbsp;% |  |
 | 136 | Avant Combustiveis Ltda | 1.198 | 100&nbsp;% |  |
 | 137 | Petrotorque Jc Distribuidora De Combustiveis Eireli | 972 | 0&nbsp;% |  |
 | 138 | Transo Combustíveis Ltda | 874 | 100&nbsp;% |  |
@@ -222,21 +224,21 @@ A meta de aposentação de CBIOs de cada distribuidora é **proporcional à sua 
 ---
 ## PETROBAHIA no censo
 
-- **Rank 11** das 163 distribuidoras (entre as ~16 maiores do país).
-- Meta 2025: 636.760 CBIOs = 1,38% do volume nacional — e **100% cumprida** (Engebio A1 + B, usinas ETB, Georba, Vale do Cravari, Júpiter — as 5 em nome próprio).
-- Referência de tesouraria e conformidade: no G2, só ela, TDC (31,19%) e ALESAT na vizinhança do ranking — e apenas PETROBAHIA com 100%.
+- **Rank 11** das 163 distribuidoras pela meta de CBIO; **9ª em volume de vendas em 2025** (2.030.040 m³; 1,48% de gasolina C + diesel B + etanol hidratado — ANP).
+- Meta 2025: 636.760 CBIOs = 1,38% da meta nacional — **100% cumprida** (636.748 aposentados; a ANP registra 100%). Lista de emissores dos CBIOs aposentados (Engebio A1 + B, usinas ETB, Georba, Vale do Cravari, Júpiter): não confirmado.
+- Referência de tesouraria e conformidade: no G2, 5 das 7 cumpriram 100% (ALESAT, Sabbá, Atem's, PETROBAHIA e Ciapetro — esta sub judice); TDC ficou em 31,19% e Aster em 0% (ANP).
 
 ## Conformidade como funil de vendas
 
-- **19 distribuidoras zeraram** a aposentação (0%): FIC/Royal FIC (esperando a janela de 2026), TDC (31,19%), Aster (0%), Duvale (0%), Império (0,03%), entre outras.
-- **16 parcialmente cumpridas** + 4 sem meta definida → 39 empresas (24%) com exposição regulatória real (juros da taxa SELIC sobre o déficit de CBIO, art. 6º, §§ 7º–8º da Lei 13.576/2017).
+- **19 distribuidoras ficaram com 0%**, entre elas Aster e Duvale. Royal FIC (30,89%; aposentou 1.578.225 CBIOs em janeiro de 2026, segundo a ANP), TDC (31,19%) e Império (0,03%) não zeraram, mas ficaram muito abaixo da meta.
+- **18 com cumprimento parcial** (37 abaixo de 100% no total) + **4 sem percentual por liminar** (sub judice) → 41 empresas (25,2% das 163) fora dos 100%. Não existe cobrança de "juros Selic" sobre o déficit de CBIO: descumprir a meta é crime ambiental (Lei 15.082/2024), e a quantidade não cumprida em 2025 foi somada às metas de 2026 (Res. ANP 791/2019, art. 10, § 1º — ANP, 31/03/2026).
 - Para essas, o pitch é objetivo: **tesouraria de CBIOs como software** (monitoramento de preço, janela de compra, execução B3) + IA de compliance.
 
 ## Onde entra a Cultura Builder (mapeamento por tier)
 
 | Tier | Dores dominantes | Soluções CB mapeadas |
 |---|---|---|
-| G1 | Escala: milhões de CBIOs, logística global, precificação intradiária | Data platform + agentes de pricing + otimização de rota (caso Vibra: R$ 900 mi desbloqueados) |
+| G1 | Escala: milhões de CBIOs, logística global, precificação intradiária | Data platform + agentes de pricing + otimização de rota (caso Vibra: R$ 900 milhões a menos em estoque — VEJA, 05/08/2026) |
 | G2 | Posição de tesouraria em CBIO, gestão de crédito (aging), janela de caminhão | Torre de controle (demo), agentes de cobrança, precificação dinâmica |
 | G3 | Margem comprimida, dependência de Excel, crédito ao posto | Automação de back-office, cobrança IA, forecast de demanda |
 | G4 | Conformidade RenovaBio, câmbio de planilhas, 1–3 pessoas na torre | Agentes de conformidade, ETL de planilhas, alertas de meta |
@@ -249,6 +251,7 @@ Para completar UF, município, porte, capital social e situação cadastral de c
 3. Anexar colunas UF/município/porte ao censo e atualizar a LP.
 
 ## Fontes
-- ANP, Relatório de Cumprimento de Metas 2025 (XLSX local, sheet Metas 2025-Publicação).
-- Lei 13.576/2017 (RenovaBio), Resolução CNPE nº 15/2022 e nº 17/2023 (metas por operadora).
+- ANP, Relatório de Cumprimento de Metas 2025 (XLSX local, sheet Metas 2025-Publicação; atualização de 14/07/2026) — conferido linha a linha em 24/09/2026.
+- ANP, "RenovaBio: ANP divulga metas definitivas para as distribuidoras em 2026" (31/03/2026): meta de 48.090.000 CBIOs (Res. CNPE nº 21/2025); cálculo pela Res. ANP 791/2019 (arts. 6º, 6º-A e 10).
+- Lei 13.576/2017 (RenovaBio) e Lei 15.082/2024 (descumprimento da meta como crime ambiental). As resoluções CNPE citadas antes (nº 15/2022 e nº 17/2023, "metas por operadora"): não confirmado.
 - Cálculo de tiers e concentração: processamento próprio do XLSX (`/tmp/censo167-clean.json`).
