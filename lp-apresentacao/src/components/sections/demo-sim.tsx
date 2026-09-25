@@ -9,7 +9,7 @@ export const fmtRs = (v: number) => "R$ " + v.toLocaleString("pt-BR", { minimumF
 export const fmtMi = (v: number) => "R$ " + v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 // margem bruta em R$/m³ (unidade do setor), ponderada pelo mix de vendas da empresa fictícia
-const MIX: Record<string, number> = { "Diesel S10": 0.36, "Gasolina C": 0.37, "Diesel S500": 0.15, Etanol: 0.12 };
+export const MIX: Record<string, number> = { "Diesel S10": 0.36, "Gasolina C": 0.37, "Diesel S500": 0.15, Etanol: 0.12 };
 export function margemPorProduto(precos: { produto: string; preco: number; custo: number }[]) {
   const acc: Record<string, { s: number; n: number }> = {};
   for (const p of precos) {
@@ -97,11 +97,32 @@ export type SimData = {
   cobrancas: Cobranca[];
   incidentes: Incidente[];
   caixa: { d: number; in: number; out: number }[];
+  aging: { faixa: string; valor: number }[];
+  vencidoTotal: number;
   acoes: { tipo: string; msg: string; acao: string; chave: string; usada: boolean; view: string }[];
   executarAcao: (chave: string) => void;
   toast: string | null;
   setModo: (m: Modo) => void;
 };
+
+// as 5 bases fictícias da malha do mapa (src/demo/malha.json)
+export const BASES: Record<string, string> = {
+  Litoral: "Camaçari/BA",
+  Sertão: "Vitória da Conquista/BA",
+  Oeste: "Barreiras/BA",
+  Vale: "Petrolina/PE",
+  Planalto: "Anápolis/GO",
+};
+
+// carteira vencida simulada por faixa (inclui os títulos da fila do agente)
+const AGING_BASE: { faixa: string; de: number; ate: number; valor: number }[] = [
+  { faixa: "1–15 dias", de: 1, ate: 15, valor: 9_184_612.4 },
+  { faixa: "16–30 dias", de: 16, ate: 30, valor: 6_203_388.15 },
+  { faixa: "31–60 dias", de: 31, ate: 60, valor: 5_873_019.72 },
+  { faixa: "+60 dias", de: 61, ate: Infinity, valor: 3_651_415.91 },
+];
+export const emAcordo = (status: string) => status === "acordo fechado" || status === "promessa em 7 dias";
+const centavos = (v: number) => Math.round(v * 100) / 100;
 
 export const SISTEMAS = [
   "Portal B2B",
@@ -121,22 +142,34 @@ export const JORNADA = [
   "Volume reservado na base; reposição antecipada pela previsão. Hoje: falta descoberta na hora.",
   "Rota com cargas agrupadas: menos km vazio; janela aceita no portal. Hoje: despachante.",
   "Telemetria ao vivo; desvio acima de 5 km aciona alerta. Hoje: posto liga para perguntar.",
-  "NF-e com ICMS automático; volume entra no consolidado ANP/RenovaBio. Hoje: planilha mensal.",
+  "NF-e com a tributação monofásica conferida; a movimentação entra no i-SIMP da ANP e na conta do RenovaBio. Hoje: planilha mensal.",
   "Boleto no portal, conciliação automática; margem real alimenta o copiloto. Hoje: fechamento mensal.",
 ];
 
 export const POSTOS: [string, string][] = [
   ["Posto Cliente 117", "Feira de Santana/BA"],
   ["Posto Cliente 204", "Camaçari/BA"],
-  ["Rede Cliente 318", "Santo Amaro/BA"],
+  ["Rede Cliente 318", "Salvador/BA"],
   ["Posto Cliente 402", "Barreiras/BA"],
-  ["Posto Cliente 526", "Alagoinhas/BA"],
-  ["Posto Cliente 611", "Alagoinhas/BA"],
-  ["Rede Cliente 735", "Lauro de Freitas/BA"],
-  ["Posto Cliente 829", "Irecê/BA"],
+  ["Posto Cliente 526", "Vitória da Conquista/BA"],
+  ["Posto Cliente 611", "Petrolina/PE"],
+  ["Rede Cliente 735", "Anápolis/GO"],
+  ["Posto Cliente 829", "Guanambi/BA"],
 ];
 
 export const PRODUTOS = ["Diesel S10", "Gasolina C", "Diesel S500", "Etanol"];
+
+// score de crédito por cliente (simulação)
+export const SCORE: Record<string, number> = {
+  "Posto Cliente 117": 92,
+  "Posto Cliente 204": 88,
+  "Rede Cliente 318": 76,
+  "Posto Cliente 402": 84,
+  "Posto Cliente 526": 71,
+  "Posto Cliente 611": 90,
+  "Rede Cliente 735": 81,
+  "Posto Cliente 829": 67,
+};
 
 export type Tema = "light" | "dark";
 
@@ -154,13 +187,13 @@ export function prodTone(produto: string, tema: Tema): string {
 
 export const AGENTES_INICIAIS: Agente[] = [
   { id: "preco", nome: "Copiloto de Preço", foco: "Preço por produto × base × região", execs: 0, impacto: 0, latencia: 30, humanoH: 9.5, ultima: "—" },
-  { id: "fiscal", nome: "Agente Fiscal", foco: "ICMS/PIS/Cofins · NF-e · ANP", execs: 0, impacto: 0, latencia: 2, humanoH: 7.0, ultima: "—" },
+  { id: "fiscal", nome: "Agente Fiscal", foco: "NF-e · ICMS monofásico · CBS/IBS 2027", execs: 0, impacto: 0, latencia: 2, humanoH: 7.0, ultima: "—" },
   { id: "rota", nome: "Agente de Rota", foco: "Roteirização e janelas de entrega", execs: 0, impacto: 0, latencia: 5, humanoH: 6.5, ultima: "—" },
-  { id: "credito", nome: "Agente de Crédito", foco: "Scoring e limite de revenda", execs: 0, impacto: 0, latencia: 1, humanoH: 4.0, ultima: "—" },
-  { id: "cobranca", nome: "Agente de Cobrança", foco: "Aging, lembretes e acordo", execs: 0, impacto: 0, latencia: 3, humanoH: 5.5, ultima: "—" },
-  { id: "prospeccao", nome: "Agente de Prospecção", foco: "Bandeira branca no NE", execs: 0, impacto: 0, latencia: 12, humanoH: 11.0, ultima: "—" },
+  { id: "credito", nome: "Agente de Crédito", foco: "Score e limite de cada revenda", execs: 0, impacto: 0, latencia: 1, humanoH: 4.0, ultima: "—" },
+  { id: "cobranca", nome: "Agente de Cobrança", foco: "Atrasos, lembretes e acordo", execs: 0, impacto: 0, latencia: 3, humanoH: 5.5, ultima: "—" },
+  { id: "prospeccao", nome: "Agente de Prospecção", foco: "Bandeira branca perto das bases", execs: 0, impacto: 0, latencia: 12, humanoH: 11.0, ultima: "—" },
   { id: "compliance", nome: "Agente de Compliance", foco: "ANP · RenovaBio · auditoria", execs: 0, impacto: 0, latencia: 8, humanoH: 3.5, ultima: "—" },
-  { id: "vendedor", nome: "Copiloto do Vendedor", foco: "Follow-up e resumo de conta", execs: 0, impacto: 0, latencia: 4, humanoH: 8.0, ultima: "—" },
+  { id: "vendedor", nome: "Copiloto do Vendedor", foco: "Retorno ao cliente e resumo de conta", execs: 0, impacto: 0, latencia: 4, humanoH: 8.0, ultima: "—" },
 ];
 
 const MOTORISTAS = ["Rodrigo M.", "Elaine S.", "Carlos T.", "Bruna F.", "Tiago A.", "Marcos L.", "Fernanda P.", "Diego R.", "Ana C.", "Jailson N."];
@@ -177,17 +210,17 @@ function rndMotorista(i: number) {
 function novaRota(i: number, minuto: number, integrada: boolean): Rota {
   const pares: [string, string][] = [
     ["Litoral", "Feira de Santana"],
-    ["Camaçari", "Camaçari"],
-    ["Barreiras", "Irecê"],
-    ["Litoral", "Santo Amaro"],
-    ["Camaçari", "Salvador"],
-    ["Itabuna", "Ilhéus"],
-    ["Barreiras", "Bom Jesus da Lapa"],
-    ["Juazeiro", "Paulo Afonso"],
-    ["Litoral", "Vitória da Conquista"],
-    ["Camaçari", "Alagoinhas"],
-    ["Barreiras", "Barreiras"],
-    ["Juazeiro", "Irecê"],
+    ["Litoral", "Salvador"],
+    ["Sertão", "Guanambi"],
+    ["Litoral", "Aracaju"],
+    ["Oeste", "Bom Jesus da Lapa"],
+    ["Litoral", "Itabuna"],
+    ["Oeste", "Palmas"],
+    ["Vale", "Juazeiro"],
+    ["Litoral", "Base Sertão"],
+    ["Vale", "Salgueiro"],
+    ["Planalto", "Brasília"],
+    ["Planalto", "Goiânia"],
   ];
   const par = pares[i % pares.length];
   const produto = PRODUTOS[(i * 3) % PRODUTOS.length];
@@ -209,7 +242,7 @@ function novaRota(i: number, minuto: number, integrada: boolean): Rota {
   };
 }
 
-function serieDias(n: number, seed: number, base: number, amp: number) {
+function serieDias(n: number, seed: number, base: number, amp: number, dec = 0) {
   let s = seed >>> 0;
   const r = () => {
     s = (s * 1664525 + 1013904223) >>> 0;
@@ -217,7 +250,7 @@ function serieDias(n: number, seed: number, base: number, amp: number) {
   };
   return Array.from({ length: n }, (_, i) => {
     const wobble = Math.sin(i / 3.1) * amp * 0.4;
-    return +(base + (r() - 0.5) * amp + wobble).toFixed(0);
+    return +(base + (r() - 0.5) * amp + wobble).toFixed(dec);
   });
 }
 export { serieDias };
@@ -226,21 +259,21 @@ const EVENTOS_IA: [string, string][] = [
   ["IA", "Pedido movido para roteirização sem toque humano."],
   ["PREÇO", "Copiloto recalculou 480 preços com o novo custo de reposição."],
   ["LOG", "Caminhão entregue dentro da janela — comprovante digital assinado."],
-  ["FISC", "Volumes reconciliados no consolidado ANP/RenovaBio."],
+  ["FISC", "Movimentação do dia conciliada para o i-SIMP da ANP."],
   ["REDE", "Posto Cliente 402: demanda +9% — IA sugere escalar volume."],
   ["CRÉD", "Consulta de crédito concluída em 40 segundos."],
   ["COBR", "Acordo de pagamento fechado por agente — parcelamento aceito."],
   ["SEG", "Divergência de medição em 3 tanques — auditoria aberta."],
-  ["TRAD", "Brent e câmbio fecharam a janela de importação: compra redirecionada ao fornecedor nacional."],
-  ["REDE", "Câmeras + IA: 2 abastecimentos com padrão de bomba-truque — OS aberta."],
+  ["TRAD", "Paridade de importação recalculada com o Brent e o dólar do dia — compra da semana revisada."],
+  ["REDE", "Câmeras + IA: 2 vendas no bico sem veículo na imagem — ordem de serviço aberta."],
 ];
 
 const EVENTOS_MAN: [string, string][] = [
-  ["ALERTA", "Tanque de Camaçari consumindo sem reposição automática."],
+  ["ALERTA", "Tanque de gasolina da Base Litoral consumindo sem reposição automática."],
   ["B2B", "Cotação sem resposta há 41h — vendedor não lembrou."],
   ["PREÇO", "Concorrente tomou o bico: preço recalculado manualmente."],
   ["LOG", "Entrega fora da janela — reagendada por telefone."],
-  ["FISC", "Relatório ANP aguardando montagem manual no fim do mês."],
+  ["FISC", "Movimentação do i-SIMP aguardando montagem manual no fim do mês."],
   ["ALERTA", "Km vazio acima do padrão — rota sem otimização."],
   ["FIN", "Fatura vencida há 12 dias sem cobrança registrada."],
   ["SEG", "Divergência compra×venda×tanque só aparece no fechamento."],
@@ -248,7 +281,7 @@ const EVENTOS_MAN: [string, string][] = [
   ["REDE", "Posto com queda de demanda descoberta no relatório mensal."],
 ];
 
-const VOLUME_DIA = 7_800_000; // litros/dia do porte calibrado
+export const VOLUME_DIA = 7_800_000; // litros/dia do porte calibrado
 const TETO_CAPTURADO = 420_000;
 const TETO_NA_MESA = 360_000;
 
@@ -273,24 +306,24 @@ export function useSim(): SimData {
   const [naMesa, setNaMesa] = useState(0);
 
   const [ordens, setOrdens] = useState<Ordem[]>([
-    { id: "P-8412", posto: "Posto Cliente 117", cidade: "Feira de Santana/BA", produto: "Diesel S10", volume: 20000, valor: 122_400, score: 92, step: 5, stepTick: 0 },
-    { id: "P-8413", posto: "Posto Cliente 204", cidade: "Camaçari/BA", produto: "Gasolina C", volume: 12000, valor: 63_720, score: 88, step: 3, stepTick: 0 },
-    { id: "P-8414", posto: "Rede Cliente 318", cidade: "Santo Amaro/BA", produto: "Diesel S500", volume: 34000, valor: 197_030, score: 76, step: 1, stepTick: 0 },
+    { id: "P-8412", posto: "Posto Cliente 117", cidade: "Feira de Santana/BA", produto: "Diesel S10", volume: 20000, valor: 122_400, score: SCORE["Posto Cliente 117"], step: 5, stepTick: 0 },
+    { id: "P-8413", posto: "Posto Cliente 204", cidade: "Camaçari/BA", produto: "Gasolina C", volume: 12000, valor: 63_720, score: SCORE["Posto Cliente 204"], step: 3, stepTick: 0 },
+    { id: "P-8414", posto: "Rede Cliente 318", cidade: "Salvador/BA", produto: "Diesel S500", volume: 34000, valor: 197_030, score: SCORE["Rede Cliente 318"], step: 1, stepTick: 0 },
   ]);
 
   const [cotacoes, setCotacoes] = useState<Cotacao[]>([
-    { id: "C-5011", posto: "Posto Cliente 829", cidade: "Irecê/BA", produto: "Diesel S10", volume: 28000, minuto: 366, respEm: null, valor: 163_520 },
-    { id: "C-5012", posto: "Rede Cliente 735", cidade: "Lauro de Freitas/BA", produto: "Gasolina C", volume: 9000, minuto: 372, respEm: 374, valor: 47_790 },
-    { id: "C-5013", posto: "Posto Cliente 526", cidade: "Alagoinhas/BA", produto: "Etanol", volume: 14000, minuto: 380, respEm: null, valor: 58_660 },
+    { id: "C-5011", posto: "Posto Cliente 829", cidade: "Guanambi/BA", produto: "Diesel S10", volume: 28000, minuto: 366, respEm: null, valor: 163_520 },
+    { id: "C-5012", posto: "Rede Cliente 735", cidade: "Anápolis/GO", produto: "Gasolina C", volume: 9000, minuto: 372, respEm: 374, valor: 47_790 },
+    { id: "C-5013", posto: "Posto Cliente 526", cidade: "Vitória da Conquista/BA", produto: "Etanol", volume: 14000, minuto: 380, respEm: null, valor: 58_660 },
   ]);
 
   const [tanques, setTanques] = useState<Tanque[]>([
-    { base: "São Francisco do Conde", produto: "Diesel S10", nivel: 62, cover: 9, critico: false, repostaEm: 0 },
-    { base: "Camaçari", produto: "Diesel S10", nivel: 54, cover: 8, critico: false, repostaEm: 0 },
-    { base: "Luís E. Magalhães", produto: "Gasolina C", nivel: 71, cover: 10, critico: false, repostaEm: 0 },
-    { base: "Suape", produto: "Diesel S500", nivel: 47, cover: 7, critico: false, repostaEm: 0 },
-    { base: "Feira de Santana", produto: "Multi", nivel: 58, cover: 8, critico: false, repostaEm: 0 },
-    { base: "Itabuna", produto: "Gasolina C", nivel: 66, cover: 9, critico: false, repostaEm: 0 },
+    { base: "Litoral", produto: "Diesel S10", nivel: 62, cover: 9, critico: false, repostaEm: 0 },
+    { base: "Litoral", produto: "Gasolina C", nivel: 54, cover: 8, critico: false, repostaEm: 0 },
+    { base: "Sertão", produto: "Diesel S500", nivel: 71, cover: 10, critico: false, repostaEm: 0 },
+    { base: "Oeste", produto: "Diesel S10", nivel: 47, cover: 7, critico: false, repostaEm: 0 },
+    { base: "Vale", produto: "Gasolina C", nivel: 58, cover: 8, critico: false, repostaEm: 0 },
+    { base: "Planalto", produto: "Etanol", nivel: 66, cover: 9, critico: false, repostaEm: 0 },
   ]);
 
   const [rotas, setRotas] = useState<Rota[]>(() =>
@@ -299,17 +332,17 @@ export function useSim(): SimData {
 
   const [precos, setPrecos] = useState<PrecoLinha[]>([
     { produto: "Diesel S10", base: "Litoral", preco: 5.842, custo: 5.412, sugerido: 5.891, concorrente: 5.918, aplicado: false },
-    { produto: "Gasolina C", base: "Camaçari", preco: 5.31, custo: 4.882, sugerido: 5.398, concorrente: 5.345, aplicado: false },
-    { produto: "Diesel S500", base: "Suape", preco: 5.795, custo: 5.388, sugerido: 5.842, concorrente: 5.861, aplicado: false },
-    { produto: "Etanol", base: "Barreiras", preco: 4.19, custo: 3.72, sugerido: 4.252, concorrente: 4.208, aplicado: false },
-    { produto: "Diesel S10", base: "Barreiras", preco: 5.918, custo: 5.462, sugerido: 5.987, concorrente: 6.012, aplicado: false },
-    { produto: "Gasolina C", base: "Itabuna", preco: 5.276, custo: 4.845, sugerido: 5.362, concorrente: 5.29, aplicado: false },
+    { produto: "Gasolina C", base: "Litoral", preco: 5.31, custo: 4.882, sugerido: 5.339, concorrente: 5.345, aplicado: false },
+    { produto: "Diesel S500", base: "Sertão", preco: 5.795, custo: 5.388, sugerido: 5.842, concorrente: 5.861, aplicado: false },
+    { produto: "Etanol", base: "Planalto", preco: 4.19, custo: 3.72, sugerido: 4.199, concorrente: 4.208, aplicado: false },
+    { produto: "Diesel S10", base: "Oeste", preco: 5.918, custo: 5.462, sugerido: 5.987, concorrente: 6.012, aplicado: false },
+    { produto: "Gasolina C", base: "Vale", preco: 5.276, custo: 4.845, sugerido: 5.284, concorrente: 5.29, aplicado: false },
   ]);
 
   const [eventos, setEventos] = useState<Evento[]>([
-    { t: 0, tipo: "IA", msg: "Previsão de demanda Barreiras: +8% na quinzena do dia 12." },
-    { t: 0, tipo: "LOG", msg: "Rota Feira de Santana → Barreiras reordenada: -12% km vazio." },
-    { t: 0, tipo: "CRÉD", msg: "Limite pré-aprovado: Posto Cliente 117 R$ 340 mil." },
+    { t: 0, tipo: "IA", msg: "Previsão de demanda na Base Oeste (Barreiras): +8% na quinzena do dia 12." },
+    { t: 0, tipo: "LOG", msg: "Rotas da Base Oeste reordenadas: −12% de km vazio." },
+    { t: 0, tipo: "CRÉD", msg: "Limite pré-aprovado: Posto Cliente 117, R$ 340.000,00." },
   ]);
 
   const [agentes, setAgentes] = useState<Agente[]>(AGENTES_INICIAIS);
@@ -321,12 +354,16 @@ export function useSim(): SimData {
     { id: "F-2235", posto: "Posto Cliente 611", valor: 18_900, dias: 3, status: "aguardando" },
   ]);
   const [incidentes] = useState<Incidente[]>([
-    { id: "INC-81", tipo: "Divergência de medição de tanque", local: "Base Camaçari", nivel: "medio", status: "investigando", ts: 240 },
-    { id: "INC-82", tipo: "Padrão de bomba-truque", local: "Posto Cliente 204 · Camaçari", nivel: "alto", status: "OS aberta", ts: 288 },
-    { id: "INC-83", tipo: "Desvio de rota 22 km", local: "Caminhão CT-08", nivel: "baixo", status: "resolvido", ts: 312 },
+    { id: "INC-81", tipo: "Divergência de medição de tanque", local: "Base Litoral · Camaçari/BA", nivel: "medio", status: "investigando", ts: 312 },
+    { id: "INC-82", tipo: "Venda no bico sem veículo na câmera", local: "Posto Cliente 204 · Camaçari/BA", nivel: "alto", status: "OS aberta", ts: 407 },
+    { id: "INC-83", tipo: "Desvio de rota 22 km", local: "Caminhão CT-08", nivel: "baixo", status: "resolvido", ts: 478 },
   ]);
   const [caixa, setCaixa] = useState<{ d: number; in: number; out: number }[]>(
-    serieDias(12, 17, 1.24, 0.5).map((v, i) => ({ d: i, in: v, out: +(v * 0.82).toFixed(2) })),
+    (() => {
+      const ent = serieDias(12, 17, 42_400_000, 4_000_000, 2);
+      const sai = serieDias(12, 29, 40_100_000, 3_600_000, 2);
+      return ent.map((v, i) => ({ d: i + 1, in: v, out: sai[i] }));
+    })(),
   );
 
   const [aplicadas, setAplicadas] = useState<string[]>([]);
@@ -387,7 +424,7 @@ export function useSim(): SimData {
               produto: prod,
               volume: vol,
               valor: Math.round(vol * precoBase),
-              score: 62 + Math.floor(Math.random() * 35),
+              score: SCORE[POSTOS[pi][0]] ?? 75,
               step: 0,
               stepTick: 0,
             },
@@ -428,7 +465,7 @@ export function useSim(): SimData {
       /* tanques */
       setTanques((ts) =>
         ts.map((tq) => {
-          let nivel = tq.nivel - (tq.base === "Camaçari" ? 1.7 : 1.1);
+          let nivel = tq.nivel - (tq.base === "Litoral" && tq.produto === "Gasolina C" ? 1.7 : 1.1);
           let repostaEm = tq.repostaEm;
           // Integrada: agente pede reposição cedo (35%); Manual: alguém percebe tarde (18%) e demora mais
           if (repostaEm > 0) {
@@ -501,9 +538,10 @@ export function useSim(): SimData {
 
       /* caixa */
       setCaixa((cx) => {
-        const inFlow = (m === "integrada" ? 1.4 : 1.15) + Math.random() * 0.5;
-        const outFlow = 1.05 + Math.random() * 0.35;
-        return [...cx.slice(-40), { d: (cx[cx.length - 1]?.d ?? 0) + 1, in: +inFlow.toFixed(2), out: +outFlow.toFixed(2) }];
+        // integrada recebe mais (cobrança por agente); valores em reais, com centavos
+        const inFlow = (m === "integrada" ? 43_300_000 : 40_600_000) + Math.random() * 2_400_000;
+        const outFlow = 40_100_000 + Math.random() * 2_200_000;
+        return [...cx.slice(-40), { d: (cx[cx.length - 1]?.d ?? 0) + 1, in: centavos(inFlow), out: centavos(outFlow) }];
       });
 
       if (Math.random() < 0.38) {
@@ -518,30 +556,56 @@ export function useSim(): SimData {
   const minutos = 360 + tick * 15;
   const hora = `${String(Math.floor(minutos / 60) % 24).padStart(2, "0")}:${String(minutos % 60).padStart(2, "0")}`;
 
-  const acoes = useMemo(
-    () => [
-      { tipo: "PREÇO", msg: "Gasolina em Camaçari R$ 0,04 abaixo do piso de margem.", acao: "Aplicar +1,2%", chave: "preco-pojuca", usada: precos.some((p) => p.base === "Camaçari" && p.aplicado), view: "precos" },
-      { tipo: "SUPRI", msg: "Demanda +8% na quinzena do dia 12 — antecipar 2 cargas.", acao: "Antecipar carga", chave: "supri-antecipa", usada: aplicadas.includes("supri-antecipa"), view: "suprimento" },
-      { tipo: "LOG", msg: "Reordenar Feira → Barreiras economiza 26 km de vazio.", acao: "Reordenar rota", chave: "log-reordena", usada: aplicadas.includes("log-reordena"), view: "logistica" },
-      { tipo: "CRÉD", msg: "Rede Cliente 318 sem resposta há 41h — follow-up com crédito em destaque.", acao: "Enviar follow-up", chave: "cred-follow", usada: aplicadas.includes("cred-follow"), view: "comercial" },
-      { tipo: "COBR", msg: "R$ 24,9 mi vencidos — agente de cobrança pronto para negociar.", acao: "Rodar cobrança", chave: "cobr-rodar", usada: aplicadas.includes("cobr-rodar"), view: "financeiro" },
-      { tipo: "FISC", msg: "Consolidado ANP do dia pronto para conferência.", acao: "Assinar consolidado", chave: "fiscal-anp", usada: aplicadas.includes("fiscal-anp"), view: "fiscal" },
-    ],
-    [precos, aplicadas],
+  // carteira vencida: títulos que entram em acordo ou promessa saem do vencido
+  const aging = useMemo(
+    () =>
+      AGING_BASE.map((f) => ({
+        faixa: f.faixa,
+        valor: centavos(f.valor - cobrancas.filter((c) => emAcordo(c.status) && c.dias >= f.de && c.dias <= f.ate).reduce((a, c) => a + c.valor, 0)),
+      })),
+    [cobrancas],
   );
+  const vencidoTotal = centavos(aging.reduce((a, f) => a + f.valor, 0));
+
+  const acoes = useMemo(() => {
+    const gas = precos.find((p) => p.produto === "Gasolina C" && p.base === "Litoral");
+    const folga = gas ? gas.concorrente - gas.preco : 0;
+    return [
+      {
+        tipo: "PREÇO",
+        msg: gas && folga > 0.0005
+          ? `Gasolina C na Base Litoral R$ ${fmtDec(folga, 3)}/L abaixo do concorrente — dá para subir sem perder o posto.`
+          : "Gasolina C na Base Litoral alinhada ao concorrente — preço sugerido pronto.",
+        acao: "Aplicar preço sugerido",
+        chave: "preco-pojuca",
+        usada: precos.some((p) => p.produto === "Gasolina C" && p.base === "Litoral" && p.aplicado),
+        view: "precos",
+      },
+      { tipo: "SUPRI", msg: "Demanda +8% na quinzena do dia 12 — antecipar 2 cargas.", acao: "Antecipar carga", chave: "supri-antecipa", usada: aplicadas.includes("supri-antecipa"), view: "suprimento" },
+      { tipo: "LOG", msg: "Reordenar as entregas de Guanambi e Bom Jesus da Lapa economiza 26 km de vazio.", acao: "Reordenar rota", chave: "log-reordena", usada: aplicadas.includes("log-reordena"), view: "logistica" },
+      { tipo: "CRÉD", msg: "Rede Cliente 318 sem resposta há 41h — follow-up com crédito em destaque.", acao: "Enviar follow-up", chave: "cred-follow", usada: aplicadas.includes("cred-follow"), view: "comercial" },
+      { tipo: "COBR", msg: `${fmtRs(vencidoTotal)} vencidos na carteira — agente de cobrança pronto para negociar a fila de hoje.`, acao: "Rodar cobrança", chave: "cobr-rodar", usada: aplicadas.includes("cobr-rodar"), view: "financeiro" },
+      { tipo: "FISC", msg: "Movimentação do mês para o i-SIMP da ANP pronta para conferência.", acao: "Conferir e assinar", chave: "fiscal-anp", usada: aplicadas.includes("fiscal-anp"), view: "fiscal" },
+    ];
+  }, [precos, aplicadas, vencidoTotal]);
 
   const executarAcao = (chave: string) => {
     if (modo !== "integrada") return;
     if (chave === "preco-pojuca") {
-      setPrecos((ps) => ps.map((p) => (p.base === "Camaçari" ? { ...p, preco: p.sugerido, aplicado: true } : p)));
-      setToast("Aplicado: gasolina Camaçari reprecificada (+1,2% de margem).");
+      const gas = precos.find((p) => p.produto === "Gasolina C" && p.base === "Litoral");
+      setPrecos((ps) => ps.map((p) => (p.produto === "Gasolina C" && p.base === "Litoral" ? { ...p, preco: p.sugerido, aplicado: true } : p)));
+      setToast(
+        gas
+          ? `Aplicado: gasolina C da Base Litoral a R$ ${fmtDec(gas.sugerido, 3)}/L (${fmtRs(centavos((gas.sugerido - gas.preco) * 1000))}/m³ a mais de margem).`
+          : "Aplicado: gasolina C da Base Litoral no preço sugerido.",
+      );
     }
     if (chave === "supri-antecipa") {
-      setTanques((ts) => ts.map((tq) => (tq.base === "Luís E. Magalhães" || tq.base === "Camaçari" ? { ...tq, nivel: Math.min(96, tq.nivel + 22), repostaEm: 0 } : tq)));
-      setToast("Aplicado: 2 cargas antecipadas para Barreiras e Camaçari.");
+      setTanques((ts) => ts.map((tq) => (tq.base === "Oeste" || (tq.base === "Litoral" && tq.produto === "Gasolina C") ? { ...tq, nivel: Math.min(96, tq.nivel + 22), repostaEm: 0 } : tq)));
+      setToast("Aplicado: 2 cargas antecipadas para as bases Oeste (Barreiras) e Litoral (Camaçari).");
     }
     if (chave === "log-reordena") {
-      setRotas((rs) => rs.map((r) => (r.para === "Irecê" || r.para === "Bom Jesus da Lapa" ? { ...r, prog: Math.min(99, r.prog + 9), atrasada: false } : r)));
+      setRotas((rs) => rs.map((r) => (r.para === "Guanambi" || r.para === "Bom Jesus da Lapa" ? { ...r, prog: Math.min(99, r.prog + 9), atrasada: false } : r)));
       setKmVazio((k) => Math.max(7, +(k - 0.8).toFixed(1)));
       setToast("Aplicado: rotas reordenadas — km vazio caiu 0,8 p.p.");
     }
@@ -554,7 +618,7 @@ export function useSim(): SimData {
       setToast("Aplicado: agente de cobrança acionou a fila — proposta de acordo enviada.");
     }
     if (chave === "fiscal-anp") {
-      setToast("Aplicado: consolidado ANP assinado digitalmente — trilha registrada.");
+      setToast("Aplicado: movimentação do i-SIMP conferida e assinada — trilha registrada.");
     }
     setAplicadas((ap) => (ap.includes(chave) ? ap : [...ap, chave]));
     pushEvento("IA", "Ação executada pelo copiloto com auditoria registrada.");
@@ -573,18 +637,18 @@ export function useSim(): SimData {
 
   return {
     tick, modo, hora, minuto: minutos, volume, receita, margem, janela, kmVazio, alertas, nfe, capturado, naMesa,
-    ordens, cotacoes, tanques, rotas, precos, eventos, agentes, cobrancas, incidentes, caixa, acoes, executarAcao, toast, setModo,
+    ordens, cotacoes, tanques, rotas, precos, eventos, agentes, cobrancas, incidentes, caixa, aging, vencidoTotal, acoes, executarAcao, toast, setModo,
   };
 }
 
 function ultimaAcao(id: string): string {
   const mapa: Record<string, string[]> = {
-    preco: ["R$: gasolina Camaçari +1,2%", "R$: diesel Barreiras -0,4%", "R$: etanol Barreiras reprecificado"],
-    fiscal: ["ICMS AL conferido", "NF-e 1.247 validadas", "Consolidado ANP enviado"],
-    rota: ["Rota 0412 reagrupada", "Janela Camaçari confirmada", "Carga dupla: -26 km"],
-    credito: ["Limite R$ 180 mi ok", "Score reavaliado", "Limite ampliado: Vale Verde"],
-    cobranca: ["Acordo: 3× parcelas", "Lembrete enviado", "Promessa registrada"],
-    prospeccao: ["12 bandeiras brancas mapeadas", "Lead Irecê qualificado", "Script de abordagem enviado"],
+    preco: ["Gasolina C · Litoral: sugerido aplicado", "Diesel S10 · Oeste: −R$ 0,004/L", "Etanol · Planalto reprecificado"],
+    fiscal: ["Repasse de ICMS conferido", "NF-e 1.247 validadas", "i-SIMP do mês conferido"],
+    rota: ["Rota 0412 reagrupada", "Janela na Base Litoral confirmada", "Carga dupla: −26 km"],
+    credito: ["Limite de R$ 180.000,00 aprovado", "Score reavaliado", "Limite ampliado: Rede Cliente 735"],
+    cobranca: ["Acordo: 3 parcelas", "Lembrete enviado", "Promessa registrada"],
+    prospeccao: ["31 postos bandeira branca mapeados (ANP)", "Lead em Petrolina qualificado", "Roteiro de abordagem enviado"],
     compliance: ["Auditoria: 3 divergências", "Checklist ANP ok", "Meta de CBIO 2026: aposentadoria em dia"],
     vendedor: ["Follow-up: Rede Cliente 318", "Resumo de conta gerado", "Proposta reenviada"],
   };

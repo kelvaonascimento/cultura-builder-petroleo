@@ -34,7 +34,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { chartTheme, fmtDec, fmtInt, fmtMi, fmtRs, margemPorProduto, margemRsM3, PAL, POSTOS, prodTone, PRODUTOS, SISTEMAS, serieDias, type Ordem, type SimData, type Tema } from "./demo-sim";
+import { BASES, chartTheme, emAcordo, fmtDec, fmtInt, fmtMi, fmtRs, margemPorProduto, margemRsM3, MIX, PAL, POSTOS, prodTone, PRODUTOS, SISTEMAS, serieDias, VOLUME_DIA, type Ordem, type SimData, type Tema } from "./demo-sim";
 import { MapaCalor, MapaOperacao } from "@/demo/mapa";
 import { RegulacaoView } from "@/demo/regulacao";
 import { MargemPracasView } from "@/demo/margem-pracas";
@@ -72,15 +72,17 @@ export type ViewProps = { sim: SimData; tema: Tema; onNav: (v: ViewId) => void }
 
 /* ================= átomos ================= */
 
-export function Stat({ label, value, delta, nota }: { label: string; value: string; delta?: string; nota?: string }) {
+// ▲/▼ = direção do número; a cor diz se é bom ou ruim (por padrão ▼ é ruim; `tom` sobrescreve, ex.: km vazio caindo é bom)
+export function Stat({ label, value, delta, nota, tom }: { label: string; value: string; delta?: string; nota?: string; tom?: "bom" | "ruim" }) {
   const up = delta?.startsWith("▲");
   const down = delta?.startsWith("▼");
+  const ruim = tom ? tom === "ruim" : down;
   return (
     <div className="flex flex-col justify-between gap-1.5 rounded-xl bg-card p-3.5 ring-1 ring-foreground/[0.07]">
       <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
       <p className={`${value.length > 13 ? "text-[15.5px]" : "text-[19px]"} whitespace-nowrap font-semibold tabular-nums leading-tight tracking-tight text-foreground`}>{value}</p>
       {(delta || nota) && (
-        <p className={`flex items-center gap-1 text-[10.5px] ${down ? "text-destructive" : up ? "text-foreground" : "text-muted-foreground"}`}>
+        <p className={`flex items-center gap-1 text-[10.5px] ${ruim ? "text-destructive" : up || down ? "text-foreground" : "text-muted-foreground"}`}>
           {up && <ArrowUpRight className="h-3 w-3" />}
           {down && <ArrowDownRight className="h-3 w-3" />}
           {delta?.replace("▲ ", "").replace("▼ ", "") ?? nota}
@@ -104,8 +106,10 @@ function PanelCard({ title, sub, action, children, className = "" }: { title: st
   );
 }
 
-function AcoesLista({ sim, limite }: { sim: SimData; limite?: number }) {
-  const lista = limite ? sim.acoes.slice(0, limite) : sim.acoes;
+// `view` mostra só as ações daquela tela; sem ela, a fila inteira
+function AcoesLista({ sim, limite, view }: { sim: SimData; limite?: number; view?: string }) {
+  const daTela = view ? sim.acoes.filter((a) => a.view === view) : sim.acoes;
+  const lista = limite ? daTela.slice(0, limite) : daTela;
   return (
     <div className="space-y-1.5">
       {lista.map((a) => (
@@ -183,14 +187,19 @@ function HoraChart({ tema }: { tema: Tema }) {
 export function VisaoGeral({ sim, tema, onNav }: ViewProps) {
   const emRota = sim.rotas.filter((r) => r.prog < 100).length;
   const atrasadas = sim.rotas.filter((r) => r.prog < 100 && r.atrasada).length;
+  // participação do diesel no volume e da gasolina na margem, pelo mix da empresa fictícia
+  const m = margemPorProduto(sim.precos);
+  const margemTotal = Object.entries(MIX).reduce((a, [p, w]) => a + (m[p] ?? 0) * w, 0);
+  const dieselVol = Math.round(((MIX["Diesel S10"] + MIX["Diesel S500"]) / Object.values(MIX).reduce((a, b) => a + b, 0)) * 100);
+  const gasMargem = margemTotal ? Math.round((((m["Gasolina C"] ?? 0) * MIX["Gasolina C"]) / margemTotal) * 100) : 0;
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
-        <Stat label="Volume do dia" value={fmtInt(sim.volume / 1000) + " m³"} delta={sim.modo === "integrada" ? "▲ +9,4%" : "▼ +4,1%"} nota="vs. ontem" />
-        <Stat label="Receita do dia" value={fmtMi(sim.receita)} delta={sim.modo === "integrada" ? "▲ +11,2%" : "▼ +5,6%"} />
+        <Stat label="Volume do dia" value={fmtInt(sim.volume / 1000) + " m³"} delta={sim.modo === "integrada" ? "▲ +9,4%" : "▼ −3,1%"} nota="vs. ontem" />
+        <Stat label="Receita do dia" value={fmtMi(sim.receita)} delta={sim.modo === "integrada" ? "▲ +11,2%" : "▼ −3,8%"} nota="vs. ontem" />
         <Stat label="Margem bruta" value={fmtRs(+margemRsM3(sim.precos).toFixed(2)) + "/m³"} delta={sim.modo === "integrada" ? "▲ copiloto repassando custo" : "▼ tabela desatualizada"} nota="média ponderada pelo mix" />
-        <Stat label="Janela cumprida" value={sim.janela + "%"} delta={sim.modo === "integrada" ? "▲ +2,1 p.p." : "▼ -4,2 p.p."} />
-        <Stat label="Km vazio" value={fmtDec(sim.kmVazio) + "%"} delta={sim.modo === "integrada" ? "▲ -3,8 p.p." : "▼ +5,1 p.p."} />
+        <Stat label="Janela cumprida" value={sim.janela + "%"} delta={sim.modo === "integrada" ? "▲ +2,1 p.p." : "▼ −4,2 p.p."} />
+        <Stat label="Km vazio" value={fmtDec(sim.kmVazio) + "%"} delta={sim.modo === "integrada" ? "▼ −3,8 p.p." : "▲ +5,1 p.p."} tom={sim.modo === "integrada" ? "bom" : "ruim"} />
         <Stat label="Alertas abertos" value={String(sim.alertas)} nota={sim.modo === "integrada" ? "tratados por agentes" : "fila humana de triagem"} />
       </div>
 
@@ -202,9 +211,9 @@ export function VisaoGeral({ sim, tema, onNav }: ViewProps) {
           action={<Badge variant="secondary">IA</Badge>}
         >
           <ul className="space-y-2 text-[11.5px] leading-snug text-foreground/80">
-            <li className="flex gap-2"><Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-foreground/60" />Volume 9% acima do previsto no corredor Salvador–Feira. Sugestão: antecipar 2 cargas para Barreiras e Camaçari.</li>
-            <li className="flex gap-2"><Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-foreground/60" />Concorrente cortou o preço da gasolina em Camaçari. Reprecificação pronta, respeitando o piso de margem.</li>
-            <li className="flex gap-2"><Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-foreground/60" />Cobrança: R$ 24,9 mi vencidos. Agente tem script de acordo; aprovação humana acima de R$ 500 mil.</li>
+            <li className="flex gap-2"><Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-foreground/60" />Volume 9% acima do previsto no corredor Salvador–Feira. Sugestão: antecipar 2 cargas para as bases Oeste (Barreiras) e Litoral (Camaçari).</li>
+            <li className="flex gap-2"><Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-foreground/60" />Gasolina C da Base Litoral abaixo do concorrente: dá para subir sem perder o posto, respeitando o piso de margem.</li>
+            <li className="flex gap-2"><Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-foreground/60" />Cobrança: {fmtRs(sim.vencidoTotal)} vencidos na carteira. O agente tem roteiro de acordo; acima de R$ 500.000,00, aprovação humana.</li>
           </ul>
           <div className="mt-3 border-t pt-3">
             <AcoesLista sim={sim} limite={3} />
@@ -242,8 +251,8 @@ export function VisaoGeral({ sim, tema, onNav }: ViewProps) {
         <PanelCard className="xl:col-span-5" title="Margem bruta por produto (R$/m³)" sub="Preço de venda − custo de reposição, média das bases (simulação)">
           <MargemProdutos sim={sim} tema={tema} />
           <div className="mt-2 grid grid-cols-2 gap-2 text-[10.5px] text-muted-foreground">
-            <p className="rounded-lg bg-secondary px-2.5 py-1.5">Diesel responde por <span className="font-semibold text-foreground">62% do volume</span></p>
-            <p className="rounded-lg bg-secondary px-2.5 py-1.5">Gasolina responde por <span className="font-semibold text-foreground">58% da margem</span></p>
+            <p className="rounded-lg bg-secondary px-2.5 py-1.5">Diesel responde por <span className="font-semibold text-foreground">{dieselVol}% do volume</span></p>
+            <p className="rounded-lg bg-secondary px-2.5 py-1.5">Gasolina responde por <span className="font-semibold text-foreground">{gasMargem}% da margem</span></p>
           </div>
         </PanelCard>
       </div>
@@ -327,9 +336,9 @@ export function ComercialView({ sim }: ViewProps) {
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <Stat label="Pedidos no portal hoje" value={fmtInt(320 + sim.ordens.length * 14)} delta={sim.modo === "integrada" ? "▲ +18%" : "▼ +6%"} nota="entrada 100% digital" />
-        <Stat label="Tempo médio de cotação" value={sim.modo === "integrada" ? "40 s" : `${mediaResp || 6} ciclos`} nota={sim.modo === "integrada" ? "de 1-3 dias" : "sem resposta ≥ 41h"} />
-        <Stat label="Crédito pré-aprovado" value="R$ 340 mi" nota="scoring em 40 segundos" />
+        <Stat label="Pedidos no portal hoje" value={fmtInt(320 + sim.ordens.length * 14)} delta={sim.modo === "integrada" ? "▲ +18%" : "▼ −6%"} nota={sim.modo === "integrada" ? "entrada 100% digital" : "WhatsApp, e-mail e telefone"} />
+        <Stat label="Tempo médio de resposta" value={`${(mediaResp || (sim.modo === "integrada" ? 1 : 6)) * 15} min`} nota={sim.modo === "integrada" ? "copiloto monta, vendedor aprova" : "ida e volta humana"} />
+        <Stat label="Crédito pré-aprovado" value="R$ 338.412.500,00" nota="soma dos limites da carteira" />
         <Stat label={sim.modo === "integrada" ? "Capturado por agentes" : "Ficando na mesa"} value={sim.modo === "integrada" ? fmtRs(sim.capturado) : fmtRs(sim.naMesa)} nota={sim.modo === "integrada" ? "oportunidades não perdidas" : "sem follow-up registrado"} />
       </div>
 
@@ -341,12 +350,12 @@ export function ComercialView({ sim }: ViewProps) {
         >
           <FunilSistemas sim={sim} />
           <div className="mt-3 border-t pt-3">
-            <AcoesLista sim={sim} />
+            <AcoesLista sim={sim} view="comercial" />
           </div>
         </PanelCard>
 
         <div className="space-y-3 xl:col-span-4">
-          <PanelCard title="Cotações chegando" sub={sim.modo === "integrada" ? "respondidas em ~1 ciclo pelo copiloto" : "resposta depende de ida e volta humana"} action={<Clock3 className="h-4 w-4 text-muted-foreground" />}>
+          <PanelCard title="Cotações chegando" sub={sim.modo === "integrada" ? "respondidas no ciclo seguinte (15 min no relógio da simulação)" : "resposta depende de ida e volta humana"} action={<Clock3 className="h-4 w-4 text-muted-foreground" />}>
             <div className="space-y-2">
               {sim.cotacoes.map((c) => {
                 const esperando = c.respEm === null;
@@ -374,9 +383,9 @@ export function ComercialView({ sim }: ViewProps) {
               })}
             </div>
           </PanelCard>
-          <PanelCard title="Scoring de crédito" sub="Histórico de 18 meses + régua de pagamentos">
+          <PanelCard title="Score de crédito" sub="Clientes da fila · histórico de 18 meses + régua de pagamentos">
             <div className="space-y-2.5">
-              {sim.ordens.slice(0, 5).map((o) => (
+              {sim.ordens.filter((o, i, arr) => arr.findIndex((x) => x.posto === o.posto) === i).slice(0, 5).map((o) => (
                 <div key={o.id}>
                   <div className="mb-1 flex items-center justify-between text-[10.5px]">
                     <span className="text-foreground/80">{o.posto}</span>
@@ -398,23 +407,31 @@ export function ComercialView({ sim }: ViewProps) {
 /* ================= 3 · Precificação ================= */
 
 export function PrecificacaoView({ sim, tema }: ViewProps) {
-  const pal = PAL[tema];
-  const sens = useMemo(
-    () =>
-      [
-        { f: "Reajuste do fornecedor +1%", m: 0.21 },
-        { f: "Câmbio +1%", m: 0.16 },
-        { f: "ICMS estado vizinho", m: 0.34 },
-        { f: "Concorrente -1%", m: -0.27 },
-      ].map((x) => ({ ...x, h: +(((sim.margem / 100) * 3_100_000 * x.m) / 100).toFixed(0) })),
-    [sim.margem],
-  );
+  // quanto custa, por dia, não reagir — sobre o volume diário do porte calibrado (modelo ilustrativo)
+  const sens = useMemo(() => {
+    const pesos = Object.entries(MIX);
+    const media = (campo: "custo" | "preco") =>
+      pesos.reduce((a, [prod, w]) => {
+        const ls = sim.precos.filter((p) => p.produto === prod);
+        return a + (ls.length ? ls.reduce((s, p) => s + p[campo], 0) / ls.length : 0) * w;
+      }, 0) / pesos.reduce((a, [, w]) => a + w, 0);
+    const custo = media("custo");
+    const preco = media("preco");
+    const rs = (v: number) => Math.round(v * 100) / 100;
+    return [
+      { f: "Custo de reposição +1% sem repasse", h: rs(-custo * 0.01 * VOLUME_DIA) },
+      { f: "Dólar +1% (25% do volume importado)", h: rs(-custo * 0.01 * 0.25 * VOLUME_DIA) },
+      { f: "Concorrente −1% numa praça (8% do volume)", h: rs(-preco * 0.01 * 0.08 * VOLUME_DIA) },
+      { f: "Copiloto repassa o reajuste no mesmo dia", h: rs(custo * 0.01 * VOLUME_DIA) },
+    ];
+  }, [sim.precos]);
+  const maxSens = Math.max(...sens.map((s) => Math.abs(s.h)));
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <Stat label="Preços recalculados hoje" value={sim.modo === "integrada" ? fmtInt(1_860 + sim.tick * 12) : "120 (manuais)"} nota="custo + frete + concorrência" />
         <Stat label="Margem média" value={fmtRs(+margemRsM3(sim.precos).toFixed(2)) + "/m³"} delta={sim.modo === "integrada" ? "▲ desde 6h" : "▼ desde 6h"} />
-        <Stat label="Ciclo de reação" value={sim.modo === "integrada" ? "30 s" : "1-2 dias"} nota="tabela editada à mão hoje" />
+        <Stat label="Ciclo de reação" value={sim.modo === "integrada" ? "30 s" : "1 a 2 dias"} nota={sim.modo === "integrada" ? "a cada reajuste de custo" : "tabela editada à mão"} />
         <Stat label="Risco de guerra de preço" value={sim.modo === "integrada" ? "baixo" : "alto"} nota="piso de margem por base" />
       </div>
 
@@ -461,7 +478,7 @@ export function PrecificacaoView({ sim, tema }: ViewProps) {
                     )}
                   </TableCell>
                   <TableCell className="py-2 text-right">
-                    {p.base === "Camaçari" ? (
+                    {p.base === "Litoral" && p.produto === "Gasolina C" ? (
                       p.aplicado ? (
                         <Badge variant="secondary" className="text-[9.5px]">aplicado</Badge>
                       ) : sim.modo === "integrada" ? (
@@ -481,38 +498,39 @@ export function PrecificacaoView({ sim, tema }: ViewProps) {
       </PanelCard>
 
       <div className="grid gap-3 xl:grid-cols-2">
-        <PanelCard title="Sensibilidade da margem" sub="Impacto estimado no mês, dado o volume do dia (modelo ilustrativo)">
+        <PanelCard title="Quanto custa um dia sem reagir" sub={`Impacto na margem do dia, sobre ${fmtInt(VOLUME_DIA / 1000)} m³ vendidos (modelo ilustrativo)`}>
           <div className="space-y-3">
             {sens.map((s) => (
-              <div key={s.f} className="flex items-center gap-3">
-                <span className="w-32 shrink-0 text-[11px] text-foreground/80">{s.f}</span>
-                <div className="relative h-5 flex-1 overflow-hidden rounded-md bg-secondary">
+              <div key={s.f} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 sm:grid-cols-[9.5rem_minmax(0,1fr)_auto]">
+                <span className="col-span-2 text-[11px] leading-snug text-foreground/80 sm:col-span-1">{s.f}</span>
+                <div className="relative h-5 overflow-hidden rounded-md bg-secondary">
                   <div
-                    className="absolute top-0 h-full rounded-md bg-foreground/70"
-                    style={{ left: s.m >= 0 ? "50%" : undefined, right: s.m < 0 ? "50%" : undefined, width: `${Math.min(50, Math.abs(s.m) * 90)}%` }}
+                    className={`absolute top-0 h-full rounded-md ${s.h < 0 ? "bg-destructive/70" : "bg-foreground/70"}`}
+                    style={{ left: s.h >= 0 ? "50%" : undefined, right: s.h < 0 ? "50%" : undefined, width: `${(Math.abs(s.h) / maxSens) * 50}%` }}
                   />
                   <div className="absolute inset-y-0 left-1/2 w-px bg-foreground/20" />
                 </div>
-                <span className={`w-16 shrink-0 text-right text-[11px] font-semibold tabular-nums ${s.m < 0 ? "text-destructive" : "text-foreground"}`}>
-                  {s.m >= 0 ? "+" : ""}
-                  {fmtRs(s.h)}
+                <span className={`shrink-0 text-right text-[11px] font-semibold tabular-nums ${s.h < 0 ? "text-destructive" : "text-foreground"}`}>
+                  {s.h >= 0 ? "+" : "−"}
+                  {fmtRs(Math.abs(s.h))}
                 </span>
               </div>
             ))}
           </div>
+          <p className="mt-2 text-[10px] leading-snug text-muted-foreground">Custo e preço médios ponderados pelo mix de vendas; parcela importada e peso da praça são premissas da simulação.</p>
           <div className="mt-3 border-t pt-3">
-            <AcoesLista sim={sim} />
+            <AcoesLista sim={sim} view="precos" />
           </div>
         </PanelCard>
         <PanelCard title="Margem por produto" sub="Média das bases monitoradas">
           <MargemProdutos sim={sim} tema={tema} />
           <div className="mt-2 grid grid-cols-2 gap-2 text-[10.5px] text-muted-foreground">
-            <p className="rounded-lg bg-secondary px-2.5 py-1.5">Piso de margem: <span className="font-semibold text-foreground">2,4% por base</span></p>
-            <p className="rounded-lg bg-secondary px-2.5 py-1.5">Reação ao vizinho: <span className="font-semibold text-foreground">30 s</span></p>
+            <p className="rounded-lg bg-secondary px-2.5 py-1.5">Piso de margem: <span className="font-semibold text-foreground">R$ 380,00/m³ por base</span></p>
+            <p className="rounded-lg bg-secondary px-2.5 py-1.5">Reação ao vizinho: <span className="font-semibold text-foreground">{sim.modo === "integrada" ? "30 s" : "1 a 2 dias"}</span></p>
           </div>
         </PanelCard>
       </div>
-      <p className="text-[10px] text-muted-foreground/60">Tons em {pal.s1 === "#1d1d1f" ? "claro" : "escuro"} · dados sintéticos</p>
+      <p className="text-[10px] text-muted-foreground/60">Preços em R$/L na base · dados simulados</p>
     </div>
   );
 }
@@ -521,28 +539,28 @@ export function PrecificacaoView({ sim, tema }: ViewProps) {
 
 export function RedeView({ sim, tema, onNav }: ViewProps) {
   const th = chartTheme(tema);
-  const demanda = useMemo(
-    () => POSTOS.map(([nome], i) => ({ nome: nome.replace("Posto ", "").replace("Auto ", "").replace("Rede ", ""), v: 4.2 + ((i * 37) % 9) * 1.3 })),
-    [],
-  );
+  // mesmo volume da tabela abaixo, em m³/dia
+  const volPosto = (i: number) => 7800 + ((i * 613) % 4200);
+  const demanda = useMemo(() => POSTOS.map(([nome], i) => ({ nome: nome.replace("Posto ", "").replace("Rede ", ""), v: volPosto(i) / 1000 })), []);
+  const mediaPosto = Math.round(POSTOS.reduce((a, _, i) => a + volPosto(i), 0) / POSTOS.length);
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <Stat label="Postos atendidos" value="142" nota="78 bandeira branca · 64 bandeirados" />
-        <Stat label="Volume/dia por posto" value="9.400 L" delta="▲ +6,2%" nota="média da rede" />
-        <Stat label="Fraude detectada (30d)" value="R$ 184,6 mil" delta={sim.modo === "integrada" ? "▲ capturada por IA" : "▼ no fechamento"} />
-        <Stat label="Captação em aberto" value={sim.modo === "integrada" ? "9 leads" : "23 leads parados"} nota="bandeira branca no interior" />
+        <Stat label="Postos atendidos" value="482" nota="170 com a bandeira · 312 bandeira branca" />
+        <Stat label="Volume/dia por posto" value={fmtInt(mediaPosto) + " L"} delta="▲ +6,2%" nota="média dos postos da tabela" />
+        <Stat label="Fraude detectada (30 dias)" value="R$ 96.318,75" delta={sim.modo === "integrada" ? "▲ capturada por IA" : "▼ só no fechamento"} />
+        <Stat label="Captação em aberto" value={sim.modo === "integrada" ? "9 leads" : "23 leads parados"} nota="postos bandeira branca perto das bases" />
       </div>
 
       <div className="grid grid-cols-1 gap-3 xl:grid-cols-12">
-        <PanelCard className="xl:col-span-7" title="Demanda por posto (litros/dia, mil)" sub="Top da rede · janela de 14 dias">
-          <div className="h-44">
+        <PanelCard className="xl:col-span-7" title="Demanda por posto (m³/dia)" sub="Postos da tabela abaixo · média de 14 dias (simulação)">
+          <div className="h-60">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={demanda} layout="vertical" margin={{ top: 4, right: 12, bottom: 0, left: 24 }}>
+              <BarChart data={demanda} layout="vertical" margin={{ top: 4, right: 12, bottom: 0, left: 8 }}>
                 <CartesianGrid stroke={th.grid} horizontal={false} />
-                <XAxis type="number" tick={th.tick} axisLine={false} tickLine={false} />
-                <YAxis type="category" dataKey="nome" tick={{ ...th.tick, fontSize: 9.5 }} axisLine={false} tickLine={false} width={70} />
-                <Tooltip contentStyle={th.tip} formatter={(v) => fmtDec(Number(v), 1) + "k L/dia"} />
+                <XAxis type="number" tick={th.tick} axisLine={false} tickLine={false} tickFormatter={(v) => fmtDec(Number(v), 0)} />
+                <YAxis type="category" dataKey="nome" tick={{ ...th.tick, fontSize: 9.5 }} axisLine={false} tickLine={false} width={72} interval={0} />
+                <Tooltip contentStyle={th.tip} formatter={(v) => fmtDec(Number(v), 3) + " m³/dia"} />
                 <Bar dataKey="v" fill="currentColor" className="text-foreground" radius={[0, 5, 5, 0]} barSize={12} />
               </BarChart>
             </ResponsiveContainer>
@@ -552,9 +570,9 @@ export function RedeView({ sim, tema, onNav }: ViewProps) {
         <PanelCard className="xl:col-span-5" title="Varejo vigiado por IA" sub="Câmeras + telemetria do posto viram contexto dos agentes" action={<Radar className="h-4 w-4 text-muted-foreground" />}>
           <div className="space-y-2">
             {[
-              { t: "Padrão de bomba-truque", d: "Câmeras cruzaram picos de bico sem passagem de veículo. OS aberta automática." },
-              { t: "Lavração suspeita", d: "Divergência compra×venda×tanque por 3 ciclos consecutivos. Auditoria aberta." },
-              { t: "Concorrência no raio", d: "Novo posto aberto a 2,1 km de Rede Cliente 318. Copiloto reposicionou preço." },
+              { t: "Venda no bico sem veículo", d: "A câmera não mostra veículo durante 2 vendas registradas no bico. Ordem de serviço aberta automaticamente." },
+              { t: "Venda sem lastro de compra", d: "Divergência compra × venda × tanque por 3 ciclos seguidos. Auditoria aberta." },
+              { t: "Concorrência no raio", d: "Novo posto aberto a 2,1 km da Rede Cliente 318. Copiloto reposicionou o preço." },
             ].map((x) => (
               <div key={x.t} className="rounded-xl bg-secondary px-3 py-2.5">
                 <p className="text-[11.5px] font-semibold text-foreground">{x.t}</p>
@@ -582,7 +600,7 @@ export function RedeView({ sim, tema, onNav }: ViewProps) {
           </TableHeader>
           <TableBody>
             {POSTOS.map(([nome, cidade], i) => {
-              const vol = 7800 + ((i * 613) % 4200);
+              const vol = volPosto(i);
               const tank = 44 + ((i * 29) % 46);
               const cam = i % 3 !== 2;
               return (
@@ -604,20 +622,28 @@ export function RedeView({ sim, tema, onNav }: ViewProps) {
         </Table>
       </PanelCard>
 
-      <PanelCard title="Captação de bandeira branca" sub="Agente de prospecção mapeia postos independentes no NE e prepara a abordagem">
+      <PanelCard title="Captação de bandeira branca" sub="O agente de prospecção cruza o cadastro público de postos da ANP com as bases e prepara a abordagem">
         <div className="grid gap-2 sm:grid-cols-3">
           {[
-            { c: "Irecê · BA", n: "Posto Cliente 829", s: "lead qualificado", v: "secondary" },
-            { c: "Luís E. Magalhães · BA", n: "3 postos na BR-242", s: "abordagem enviada", v: "secondary" },
-            { c: "Barreiras · BA", n: "Rede oeste (12 postos)", s: "aguardando visita", v: "outline" },
+            { c: "Luís Eduardo Magalhães · BA", n: "31 de 40 postos são bandeira branca", b: "Base Oeste · Barreiras", s: "abordagem enviada", v: "secondary" },
+            { c: "Petrolina · PE", n: "46 de 83 postos são bandeira branca", b: "Base Vale · na cidade", s: "12 leads qualificados", v: "secondary" },
+            { c: "Anápolis · GO", n: "46 de 91 postos são bandeira branca", b: "Base Planalto · na cidade", s: "aguardando visita", v: "outline" },
           ].map((x) => (
             <div key={x.c} className="rounded-xl bg-secondary p-3">
               <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{x.c}</p>
               <p className="mt-1 text-[12.5px] font-semibold text-foreground">{x.n}</p>
+              <p className="mt-0.5 text-[10.5px] text-muted-foreground">{x.b}</p>
               <Badge variant={x.v as "secondary" | "outline"} className="mt-2 text-[9px]">{x.s}</Badge>
             </div>
           ))}
         </div>
+        <p className="mt-2 text-[10px] leading-snug text-muted-foreground">
+          Contagem de postos:{" "}
+          <a href="https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/dados-cadastrais-dos-revendedores-varejistas-de-combustiveis-automotivos" target="_blank" rel="noreferrer" className="underline-offset-2 hover:underline">
+            cadastro de revendedores varejistas da ANP ↗
+          </a>{" "}
+          (consultado em 24/09/2026) · situação de cada lead: simulada.
+        </p>
       </PanelCard>
     </div>
   );
@@ -628,14 +654,18 @@ export function RedeView({ sim, tema, onNav }: ViewProps) {
 export function SuprimentoView({ sim, tema }: ViewProps) {
   const th = chartTheme(tema);
   const pal = PAL[tema];
-  const custo = useMemo(() => serieDias(14, 77, 5.42, 0.22).map((v, i) => ({ d: `d${i + 1}`, custo: +v.toFixed(2) })), []);
+  // custo de reposição do diesel S10 na Base Litoral: degrau no dia do reajuste do fornecedor (simulação)
+  const custo = useMemo(
+    () => serieDias(14, 77, 0, 0.012, 3).map((ruido, i) => ({ d: `d${i + 1}`, custo: +((i < 9 ? 5.362 : 5.412) + ruido).toFixed(3) })),
+    [],
+  );
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <Stat label="Cobertura média" value={fmtDec(sim.tanques.reduce((a, t) => a + t.cover, 0) / sim.tanques.length, 0) + " dias"} nota="reposição antecipada pela previsão" />
         <Stat label="Tanques críticos" value={String(sim.tanques.filter((t) => t.critico).length)} nota={sim.modo === "integrada" ? "reposição já acionada" : "descoberta na hora"} />
-        <Stat label="Custo médio (R$/L)" value={fmtDec(sim.precos.reduce((a, p) => a + p.custo, 0) / sim.precos.length, 3)} delta="▲ +1,1%" nota="custo de reposição por base" />
-        <Stat label="Compras em aberto" value="3 POs" nota="confirmadas com refinaria/trading" />
+        <Stat label="Custo médio (R$/L)" value={fmtDec(sim.precos.reduce((a, p) => a + p.custo, 0) / sim.precos.length, 3)} delta="▲ +0,9% em 14 dias" tom="ruim" nota="custo de reposição nas bases" />
+        <Stat label="Compras em aberto" value="3 pedidos" nota="refinaria, importação e duto" />
       </div>
 
       <div className="grid grid-cols-1 gap-3 xl:grid-cols-12">
@@ -645,7 +675,8 @@ export function SuprimentoView({ sim, tema }: ViewProps) {
               <div key={t.base + t.produto}>
                 <div className="mb-1 flex items-center gap-2 text-[11px]">
                   <Fuel className={`h-3.5 w-3.5 ${t.critico ? "text-destructive" : "text-muted-foreground"}`} />
-                  <span className="font-semibold text-foreground">{t.base}</span>
+                  <span className="font-semibold text-foreground">Base {t.base}</span>
+                  <span className="hidden text-muted-foreground sm:inline">· {BASES[t.base]}</span>
                   <span className="text-muted-foreground">· {t.produto}</span>
                   <span className={`ml-auto tabular-nums ${t.nivel < 35 ? "text-foreground font-semibold" : "text-muted-foreground"}`}>{Math.round(t.nivel)}% · {t.cover}d</span>
                 </div>
@@ -654,7 +685,7 @@ export function SuprimentoView({ sim, tema }: ViewProps) {
                 </div>
                 {t.nivel < 40 && (
                   <p className="mt-1 text-[10px] text-muted-foreground">
-                    {sim.modo === "integrada" ? (t.repostaEm > 0 ? `carga de reposição em rota — chega em ${t.repostaEm} ciclos` : "reposição agendada pela previsão") : "reposição depende de ligação manual ao terminal"}
+                    {sim.modo === "integrada" ? (t.repostaEm > 0 ? `carga de reposição em rota — chega em ${t.repostaEm * 15} min no relógio da simulação` : "reposição agendada pela previsão") : t.repostaEm > 0 ? `alguém ligou para o terminal — carga chega em ${t.repostaEm * 15} min` : "reposição depende de ligação manual ao terminal"}
                   </p>
                 )}
               </div>
@@ -663,10 +694,10 @@ export function SuprimentoView({ sim, tema }: ViewProps) {
         </PanelCard>
 
         <div className="space-y-3 xl:col-span-6">
-          <PanelCard title="Custo de aquisição (R$/L)" sub="14 dias · reajustes do fornecedor e subvenção refletidos" action={<Badge variant="secondary">copiloto de compra</Badge>}>
+          <PanelCard title="Custo de reposição · Diesel S10 na Base Litoral (R$/L)" sub="14 dias · reajuste do fornecedor no dia 10 · subvenção federal já descontada (simulação)" action={<Badge variant="secondary">copiloto de compra</Badge>}>
             <div className="h-36">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={custo} margin={{ top: 6, right: 8, bottom: 0, left: -12 }}>
+                <AreaChart data={custo} margin={{ top: 6, right: 8, bottom: 0, left: 0 }}>
                   <defs>
                     <linearGradient id="gCusto" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor={pal.s1} stopOpacity={0.18} />
@@ -675,48 +706,36 @@ export function SuprimentoView({ sim, tema }: ViewProps) {
                   </defs>
                   <CartesianGrid stroke={th.grid} vertical={false} />
                   <XAxis dataKey="d" tick={th.tick} axisLine={false} tickLine={false} />
-                  <YAxis tick={th.tick} axisLine={false} tickLine={false} domain={["auto", "auto"]} tickFormatter={(v) => Number(v).toFixed(1)} />
-                  <Tooltip contentStyle={th.tip} formatter={(v) => "R$ " + fmtDec(Number(v), 2)} />
+                  <YAxis tick={th.tick} axisLine={false} tickLine={false} domain={["auto", "auto"]} tickFormatter={(v) => fmtDec(Number(v), 2)} width={40} />
+                  <Tooltip contentStyle={th.tip} formatter={(v) => "R$ " + fmtDec(Number(v), 3) + "/L"} />
                   <Area type="monotone" dataKey="custo" stroke={pal.s1} strokeWidth={2} fill="url(#gCusto)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           </PanelCard>
-          <PanelCard title="Compras em aberto" sub="pedidos de compra confirmados (simulação)">
-            <Table>
-              <TableHeader>
-                <TableRow className="hover:bg-transparent">
-                  <TableHead className="text-[10px] uppercase tracking-wider">PO</TableHead>
-                  <TableHead className="text-[10px] uppercase tracking-wider">Fornecedor</TableHead>
-                  <TableHead className="text-right text-[10px] uppercase tracking-wider">Volume</TableHead>
-                  <TableHead className="text-right text-[10px] uppercase tracking-wider">Chegada</TableHead>
-                  <TableHead className="text-right text-[10px] uppercase tracking-wider">Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {[
-                  ["PO-1187", "Refino Mataripe", "120.000 L", "em 2 dias", "confirmado"],
-                  ["PO-1191", "Importação Suape", "85.000 L", "em 5 dias", "em trânsito"],
-                  ["PO-1196", "Trading interno", "64.000 L", "em 9 dias", "aguardando"],
-                ].map(([po, f, vol, che, st]) => (
-                  <TableRow key={po}>
-                    <TableCell className="py-1.5 font-mono text-[10.5px] font-semibold">{po}</TableCell>
-                    <TableCell className="py-1.5 text-[11.5px] text-muted-foreground">{f}</TableCell>
-                    <TableCell className="py-1.5 text-right text-[11.5px] tabular-nums">{vol}</TableCell>
-                    <TableCell className="py-1.5 text-right text-[11.5px] text-muted-foreground">{che}</TableCell>
-                    <TableCell className="py-1.5 text-right">
-                      <Badge variant={st === "aguardando" ? "outline" : "secondary"} className="text-[9px]">{st}</Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+          <PanelCard title="Compras em aberto" sub="Pedidos de compra da semana (simulação) · origens da malha real do mapa">
+            <div className="space-y-1.5">
+              {[
+                ["PC-1187", "Refinaria de Mataripe → Base Litoral", "12.000 m³", "chega em 2 dias", "confirmado"],
+                ["PC-1191", "Importação pelo Porto de Suape (navio)", "38.000 m³", "chega em 5 dias", "em trânsito"],
+                ["PC-1196", "REPLAN pelo duto OSBRA (Senador Canedo) → Base Planalto", "9.500 m³", "chega em 9 dias", "aguardando"],
+              ].map(([po, f, vol, che, st]) => (
+                <div key={po} className="rounded-lg bg-secondary px-3 py-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-[10.5px] font-semibold text-foreground">{po}</span>
+                    <span className="text-[11px] font-semibold tabular-nums text-foreground">{vol}</span>
+                    <Badge variant={st === "aguardando" ? "outline" : "secondary"} className="ml-auto shrink-0 text-[9px]">{st}</Badge>
+                  </div>
+                  <p className="mt-0.5 text-[10.5px] leading-snug text-muted-foreground">{f} · {che}</p>
+                </div>
+              ))}
+            </div>
           </PanelCard>
         </div>
       </div>
 
       <PanelCard title="Ação sugerida pelo copiloto" sub="com impacto no caixa">
-        <AcoesLista sim={sim} />
+        <AcoesLista sim={sim} view="suprimento" />
       </PanelCard>
     </div>
   );
@@ -795,74 +814,91 @@ const STATUS_VAR: Record<string, "default" | "outline" | "secondary"> = {
 export function FinanceiroView({ sim, tema }: ViewProps) {
   const th = chartTheme(tema);
   const pal = PAL[tema];
-  const totalVencido = sim.cobrancas.filter((c) => c.dias > 30 && !c.status.startsWith("acordo") && c.status !== "promessa em 7 dias").reduce((a, c) => a + c.valor, 0);
+  const totalVencido = sim.aging.slice(2).reduce((a, f) => a + f.valor, 0);
+  const emAcordoTotal = sim.cobrancas.filter((c) => emAcordo(c.status)).reduce((a, c) => a + c.valor, 0);
   const dso = sim.modo === "integrada" ? 27 : 41;
-  const faixas = [
-    ["0–15 dias", 412_000, "ok"],
-    ["16–30 dias", 268_000, "ok"],
-    ["31–60 dias", sim.cobrancas.filter((c) => c.dias > 30 && c.dias <= 60).reduce((a, c) => a + c.valor, 0), "alerta"],
-    ["+60 dias", sim.cobrancas.filter((c) => c.dias > 60).reduce((a, c) => a + c.valor, 0), "erro"],
-  ] as [string, number, string][];
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <Stat label="Receita do dia" value={fmtMi(sim.receita)} delta={sim.modo === "integrada" ? "▲ +11,2%" : "▼ +5,6%"} />
-        <Stat label="Títulos vencidos (>30d)" value={fmtRs(totalVencido)} nota="fila sob gestão do agente" />
-        <Stat label="DSO" value={dso + " dias"} delta={sim.modo === "integrada" ? "▲ -9 dias vs. manual" : "▼ +4 dias vs. meta"} />
+        <Stat label="Receita do dia" value={fmtMi(sim.receita)} delta={sim.modo === "integrada" ? "▲ +11,2%" : "▼ −3,8%"} nota="vs. ontem" />
+        <Stat label="Vencidos há mais de 30 dias" value={fmtRs(+totalVencido.toFixed(2))} nota="carteira inteira, sem acordo" />
+        <Stat label="Prazo médio de recebimento" value={dso + " dias"} delta={sim.modo === "integrada" ? "▼ −9 dias vs. manual" : "▲ +4 dias vs. meta"} tom={sim.modo === "integrada" ? "bom" : "ruim"} />
         <Stat label="Margem bruta" value={fmtRs(+margemRsM3(sim.precos).toFixed(2)) + "/m³"} nota={sim.modo === "integrada" ? "copiloto no controle" : "caindo com preço do vizinho"} />
       </div>
 
       <div className="grid grid-cols-1 gap-3 xl:grid-cols-12">
-        <PanelCard className="xl:col-span-7" title="Fluxo de caixa diário" sub="Entradas × saídas — R$ milhões (simulação)">
-          <div className="h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={sim.caixa.slice(-14)} margin={{ top: 6, right: 8, bottom: 0, left: -16 }}>
-                <CartesianGrid stroke={th.grid} vertical={false} />
-                <XAxis dataKey="d" tick={th.tick} axisLine={false} tickLine={false} tickFormatter={(d) => "d" + d} />
-                <YAxis tick={th.tick} axisLine={false} tickLine={false} tickFormatter={(v) => Number(v).toFixed(1)} />
-                <Tooltip contentStyle={th.tip} cursor={{ fill: "rgba(127,127,127,0.08)" }} formatter={(v) => "R$ " + fmtDec(Number(v), 2) + " mi"} />
-                <Bar dataKey="in" fill={pal.s1} radius={[3, 3, 0, 0]} barSize={9} />
-                <Bar dataKey="out" fill={pal.s3} radius={[3, 3, 0, 0]} barSize={9} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </PanelCard>
+        <div className="min-w-0 space-y-3 xl:col-span-7">
+          <PanelCard title="Fluxo de caixa diário (R$)" sub="Recebimentos × pagamentos a fornecedores, frete e tributos (simulação)">
+            <div className="mb-1 flex gap-3 text-[10.5px] text-muted-foreground">
+              {[
+                ["Recebimentos", pal.s1],
+                ["Pagamentos", pal.s3],
+              ].map(([r, c]) => (
+                <span key={r} className="inline-flex items-center gap-1.5">
+                  <span className="h-2 w-3 rounded-sm" style={{ background: c }} />
+                  <span className="text-foreground">{r}</span>
+                </span>
+              ))}
+            </div>
+            <div className="h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={sim.caixa.slice(-14)} margin={{ top: 6, right: 8, bottom: 0, left: 0 }}>
+                  <CartesianGrid stroke={th.grid} vertical={false} />
+                  <XAxis dataKey="d" tick={th.tick} axisLine={false} tickLine={false} tickFormatter={(d) => "dia " + d} />
+                  <YAxis tick={{ ...th.tick, fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={(v) => fmtRs(Number(v))} width={92} />
+                  <Tooltip contentStyle={th.tip} cursor={{ fill: "rgba(127,127,127,0.08)" }} labelFormatter={(d) => "dia " + d} formatter={(v, n) => [fmtRs(Number(v)), n === "in" ? "Recebimentos" : "Pagamentos"]} />
+                  <Bar dataKey="in" name="in" fill={pal.s1} radius={[3, 3, 0, 0]} barSize={9} isAnimationActive={false} />
+                  <Bar dataKey="out" name="out" fill={pal.s3} radius={[3, 3, 0, 0]} barSize={9} isAnimationActive={false} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </PanelCard>
+
+          <PanelCard title="Carteira vencida por faixa de atraso" sub={`Total vencido sem acordo: ${fmtRs(sim.vencidoTotal)} (simulação)`}>
+            <div className="grid grid-cols-2 gap-2">
+              {sim.aging.map((f, i) => (
+                <div key={f.faixa} className="rounded-xl bg-secondary p-3">
+                  <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{f.faixa}</p>
+                  <p className={`mt-1 whitespace-nowrap text-[14px] font-semibold tabular-nums sm:text-[15px] ${i === 3 ? "text-destructive" : "text-foreground"}`}>{fmtRs(f.valor)}</p>
+                </div>
+              ))}
+            </div>
+            <p className="mt-2 text-[10.5px] text-muted-foreground">
+              {emAcordoTotal > 0
+                ? `${fmtRs(emAcordoTotal)} saíram do vencido hoje por acordo ou promessa fechados pelo agente.`
+                : sim.modo === "integrada"
+                  ? "O agente ainda não fechou acordo hoje."
+                  : "No modo manual, a fila espera alguém ligar."}
+            </p>
+          </PanelCard>
+        </div>
 
         <PanelCard
           className="xl:col-span-5"
-          title="Aging e cobrança por agentes"
-          sub="Lembrete, acordo e promessa registrados com trilha. Aprovação humana acima de R$ 500 mil."
+          title="Cobrança por agentes · fila de hoje"
+          sub="Lembrete, acordo e promessa registrados com trilha. Acima de R$ 500.000,00, aprovação humana."
           action={<Bot className="h-4 w-4 text-muted-foreground" />}
         >
           <div className="space-y-1.5">
             {sim.cobrancas.map((c) => (
-              <div key={c.id} className="flex items-center gap-2 rounded-lg bg-secondary px-3 py-2">
-                <span className="font-mono text-[10.5px] font-semibold text-foreground">{c.id}</span>
-                <span className="text-[11.5px] font-semibold text-foreground">{c.posto}</span>
-                <span className="text-[10.5px] tabular-nums text-muted-foreground">{fmtRs(c.valor)}</span>
-                <span className="ml-auto flex items-center gap-2">
-                  <span className={`text-[10.5px] tabular-nums ${c.dias > 60 ? "font-semibold text-destructive" : c.dias > 30 ? "text-foreground" : "text-muted-foreground"}`}>{c.dias}d</span>
-                  <Badge variant={STATUS_VAR[c.status] ?? "outline"} className="text-[9px]">{c.status}</Badge>
-                </span>
+              <div key={c.id} className="rounded-lg bg-secondary px-3 py-2">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-[10.5px] font-semibold text-foreground">{c.id}</span>
+                  <span className="truncate text-[11.5px] font-semibold text-foreground">{c.posto}</span>
+                  <Badge variant={STATUS_VAR[c.status] ?? "outline"} className="ml-auto shrink-0 text-[9px]">{c.status}</Badge>
+                </div>
+                <p className="mt-0.5 text-[10.5px] tabular-nums text-muted-foreground">
+                  {fmtRs(c.valor)} ·{" "}
+                  <span className={c.dias > 60 ? "font-semibold text-destructive" : c.dias > 30 ? "text-foreground" : ""}>{c.dias} dias de atraso</span>
+                </p>
               </div>
             ))}
           </div>
           <div className="mt-3 border-t pt-3">
-            <AcoesLista sim={sim} />
+            <AcoesLista sim={sim} view="financeiro" />
           </div>
         </PanelCard>
       </div>
-
-      <PanelCard title="Aging em faixas" sub="Total em aberto por faixa de atraso (simulação)">
-        <div className="grid gap-2 sm:grid-cols-4">
-          {faixas.map(([f, v, tone]) => (
-            <div key={f} className="rounded-xl bg-secondary p-3">
-              <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{f}</p>
-              <p className={`mt-1 text-[15px] font-semibold tabular-nums ${tone === "erro" ? "text-destructive" : "text-foreground"}`}>{fmtRs(v)}</p>
-            </div>
-          ))}
-        </div>
-      </PanelCard>
     </div>
   );
 }
@@ -880,9 +916,9 @@ export function CentroIAView({ sim, tema }: ViewProps) {
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <Stat label="Execuções hoje" value={fmtInt(totalExecs)} nota={sim.modo === "integrada" ? "agentes no ar" : "aguardando modo integrado"} />
-        <Stat label="Impacto financeiro estimado" value={fmtRs(totalImpacto)} nota="modelo ilustrativo" />
-        <Stat label="Horas humanas poupadas/dia" value={fmtDec(totalHoras, 1) + " h"} nota="equivalente a 1,5 pessoas" />
-        <Stat label="Latência mediana" value={fmtDec(sim.agentes.reduce((a, g) => a + g.latencia, 0) / sim.agentes.length, 0) + " s"} nota="por execução" />
+        <Stat label="Impacto financeiro estimado" value={fmtRs(+totalImpacto.toFixed(2))} nota="modelo ilustrativo" />
+        <Stat label="Horas humanas poupadas/dia" value={fmtDec(totalHoras, 1) + " h"} nota={`equivalente a ${fmtDec(totalHoras / 8, 1)} pessoas em jornada de 8 h`} />
+        <Stat label="Tempo médio por execução" value={fmtDec(sim.agentes.reduce((a, g) => a + g.latencia, 0) / sim.agentes.length, 0) + " s"} nota="média dos 8 agentes" />
       </div>
 
       <PanelCard title="Os 8 agentes operando o fluxo" sub="Cada um com dono, foco e trilha de auditoria — sem agente solto na esteira.">
@@ -896,17 +932,20 @@ export function CentroIAView({ sim, tema }: ViewProps) {
                   <p className="text-[10px] leading-snug text-muted-foreground">{g.foco}</p>
                 </div>
               </div>
-              <div className="mt-3 grid grid-cols-3 gap-1.5 text-center">
+              <div className="mt-3 grid grid-cols-2 gap-1.5 text-center">
                 {[
-                  ["execs", fmtInt(g.execs)],
-                  ["impacto", "R$ " + fmtInt(g.impacto / 1000) + "k"],
-                  ["latência", g.latencia + "s"],
+                  ["execuções", fmtInt(g.execs)],
+                  ["tempo", g.latencia + " s"],
                 ].map(([l, v]) => (
                   <div key={l} className="rounded-lg bg-card py-1.5 ring-1 ring-foreground/[0.07]">
                     <p className="text-[8.5px] font-medium uppercase tracking-wider text-muted-foreground">{l}</p>
                     <p className="text-[10.5px] font-semibold tabular-nums text-foreground">{v}</p>
                   </div>
                 ))}
+                <div className="col-span-2 rounded-lg bg-card py-1.5 ring-1 ring-foreground/[0.07]">
+                  <p className="text-[8.5px] font-medium uppercase tracking-wider text-muted-foreground">impacto estimado</p>
+                  <p className="text-[10.5px] font-semibold tabular-nums text-foreground">{fmtRs(+g.impacto.toFixed(2))}</p>
+                </div>
               </div>
               <p className={`mt-2 truncate rounded-lg px-2 py-1.5 text-[10px] ${sim.modo === "integrada" ? "bg-card text-foreground/80 ring-1 ring-foreground/[0.07]" : "bg-card text-muted-foreground ring-1 ring-foreground/[0.07]"}`}>
                 {sim.modo === "integrada" ? `última: ${g.ultima}` : `aguardando: ${g.humanoH.toFixed(1)} h/dia de time humano`}
@@ -922,9 +961,9 @@ export function CentroIAView({ sim, tema }: ViewProps) {
             {[
               ["Cotações no WhatsApp", "vira pedido com cotação e crédito no portal"],
               ["Planilha de preços", "vira copiloto com piso de margem por base"],
-              ["Notas fiscais em PDF", "vira apuração ICMS/IBS-CBS automática"],
-              ["Relatório ANP manual", "vira consolidado diário com trilha"],
-              ["Aging no e-mail", "vira fila de cobrança com script de acordo"],
+              ["Notas fiscais em PDF", "vira conferência automática de NF-e e dos repasses de ICMS"],
+              ["i-SIMP montado à mão", "vira movimentação conciliada todo dia, com trilha"],
+              ["Títulos vencidos no e-mail", "vira fila de cobrança com roteiro de acordo"],
             ].map(([de, para]) => (
               <div key={de} className="flex items-center gap-2 rounded-lg bg-secondary px-3 py-2 text-[11px]">
                 <span className="text-muted-foreground">{de}</span>
@@ -937,11 +976,11 @@ export function CentroIAView({ sim, tema }: ViewProps) {
         <PanelCard className="xl:col-span-5" title="Aprovação humana onde importa" sub="Agentes propõem; humanos decidem nas exceções.">
           <div className="space-y-1.5">
             {[
-              ["Preço abaixo do piso", "copiloto propõe · gestor aprova no app", "#fbbf24"],
-              ["Crédito acima de R$ 500 mil", "scoring automático · comitê aprova", "#fbbf24"],
+              ["Preço abaixo do piso", "copiloto propõe · gestor aprova no app", pal.warn],
+              ["Crédito acima de R$ 500.000,00", "score automático · comitê aprova", pal.warn],
               ["Desconto fora da régua", "bloqueado no portal até aprovação", pal.err],
               ["Roteirização e janelas", "agente decide sozinho (regra clara)", pal.ok],
-              ["Cobrança até R$ 500 mil", "agente negocia com script", pal.ok],
+              ["Cobrança até R$ 500.000,00", "agente negocia com roteiro", pal.ok],
             ].map(([t, d, cor]) => (
               <div key={t} className="flex items-center gap-2 rounded-lg bg-secondary px-3 py-2">
                 <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: cor }} />
@@ -963,9 +1002,9 @@ export function SegurancaView({ sim }: ViewProps) {
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <Stat label="Incidentes abertos" value={String(sim.incidentes.filter((i) => i.status !== "resolvido").length)} nota="triagem automática" />
-        <Stat label="Trilhas de auditoria" value="100%" nota="append-only · imutável" />
-        <Stat label="Acessos por SSO" value="94%" nota="SAML + MFA obrigatório" />
-        <Stat label="Residência de dados" value="Brasil" nota="LGPD por padrão" />
+        <Stat label="Ações com trilha" value="100%" nota="registro só de acréscimo, imutável" />
+        <Stat label="Acessos com login único" value="94%" nota="SSO com segundo fator obrigatório" />
+        <Stat label="Banco de dados" value="no Brasil" nota="LGPD por padrão" />
       </div>
 
       <div className="grid grid-cols-1 gap-3 xl:grid-cols-12">
@@ -973,7 +1012,7 @@ export function SegurancaView({ sim }: ViewProps) {
           <div className="space-y-1.5">
             {sim.incidentes.map((i) => (
               <div key={i.id} className="flex items-center gap-3 rounded-lg bg-secondary px-3 py-2.5">
-                <Badge variant={i.nivel === "alto" ? "default" : "outline"} className="w-14 shrink-0 justify-center text-[9px] uppercase">{i.nivel}</Badge>
+                <Badge variant={i.nivel === "alto" ? "default" : "outline"} className="w-14 shrink-0 justify-center text-[9px] uppercase">{NIVEL[i.nivel] ?? i.nivel}</Badge>
                 <div className="flex-1">
                   <p className="text-[11.5px] font-semibold text-foreground">{i.tipo}</p>
                   <p className="text-[10px] text-muted-foreground">{i.local} · {fmtMinTs(i.ts)}</p>
@@ -983,22 +1022,25 @@ export function SegurancaView({ sim }: ViewProps) {
             ))}
           </div>
           <div className="mt-3 rounded-lg bg-secondary px-3 py-2.5 text-[11px] leading-snug text-muted-foreground">
-            <span className="font-semibold text-foreground">Por que importa:</span> fraude em distribuidoras pequenas e médias costuma aparecer no fechamento mensal — semanas depois. Aqui, divergência de medição e bomba adulterada aparecem em minutos, com OS aberta e trilha para auditoria.
+            <span className="font-semibold text-foreground">Por que importa:</span> no modo manual, divergência de medição e venda sem lastro só aparecem no fechamento do mês. Aqui aparecem em minutos, com ordem de serviço aberta e trilha para auditoria. Contexto público: as operações Carbono Oculto (2025) e Bomba Oculta (2026) miraram o crime organizado no setor —{" "}
+            <a href="https://www.gov.br/anp/pt-br/canais_atendimento/imprensa/noticias-comunicados/operacao-bomba-oculta-fecha-o-cerco-a-postos-de-combustiveis-clandestinos" target="_blank" rel="noreferrer" className="underline-offset-2 hover:underline">
+              ANP ↗
+            </a>
           </div>
         </PanelCard>
 
         <div className="space-y-3 xl:col-span-6">
-          <PanelCard title="Controles de segurança" sub="O que a plataforma integra por padrão">
+          <PanelCard title="Controles de segurança" sub="O que entra no escopo da implantação">
             <div className="grid gap-1.5 sm:grid-cols-2">
               {[
-                "SSO SAML + MFA obrigatório",
-                "Criptografia em repouso e trânsito",
-                "Trilha append-only por ação",
-                "Backups e DR testados",
-                "LGPD: minimização e consentimento",
-                "OWASP Top 10 no pipeline",
-                "Pentest e revisão contínua",
-                "Isolamento por tenant",
+                "Login único (SSO) com segundo fator",
+                "Criptografia em repouso e em trânsito",
+                "Trilha imutável por ação",
+                "Cópias de segurança e recuperação testadas",
+                "LGPD: minimização e base legal",
+                "Checagem OWASP Top 10 a cada versão",
+                "Teste de invasão e revisão contínua",
+                "Dados isolados por empresa",
               ].map((c) => (
                 <div key={c} className="flex items-center gap-2 rounded-lg bg-secondary px-3 py-2 text-[11px]">
                   <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-foreground/70" />
@@ -1017,7 +1059,7 @@ export function SegurancaView({ sim }: ViewProps) {
                 </div>
               ))}
             </div>
-            <p className="mt-2 flex items-center gap-1.5 text-[10px] text-muted-foreground"><ShieldCheck className="h-3 w-3" />Nada sai do ambiente do cliente; modelo não treina com dados da operação.</p>
+            <p className="mt-2 flex items-start gap-1.5 text-[10px] leading-snug text-muted-foreground"><ShieldCheck className="mt-px h-3 w-3 shrink-0" />Dados trafegam criptografados; pelos termos comerciais das APIs de modelo, os dados da operação não são usados para treinar o modelo.</p>
           </PanelCard>
         </div>
       </div>
@@ -1025,10 +1067,11 @@ export function SegurancaView({ sim }: ViewProps) {
   );
 }
 
-function fmtMinTs(t: number) {
-  const m = 360 + t * 15;
-  return `${String(Math.floor(m / 60) % 24).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+// hora do dia (minutos desde 00:00)
+function fmtMinTs(m: number) {
+  return `hoje, ${String(Math.floor(m / 60) % 24).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
 }
+const NIVEL: Record<string, string> = { baixo: "baixo", medio: "médio", alto: "alto" };
 
 /* ================= 11 · Jornada (rodapé do demo) ================= */
 

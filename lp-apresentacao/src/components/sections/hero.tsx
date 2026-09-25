@@ -39,7 +39,7 @@ const stats: {
     decimals: 2,
     label: "Dos 45.807 postos do país são bandeira branca — no Nordeste, 61,61%.",
     fonte: "ANP — cadastro de revendedores varejistas (24/09/2026)",
-    url: "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/revendedores-varejistas-de-combustiveis-automotivos",
+    url: "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/dados-cadastrais-dos-revendedores-varejistas-de-combustiveis-automotivos",
   },
   {
     value: 17.488,
